@@ -101,7 +101,8 @@ STUDENT_FIELDS = {
     "expected_meetings": "Number of Expected Meetings - Student/Mentor",
     "completed_meetings": "[Current + Archived] No. of Meetings Completed",
     "notes_summary": "Mentor-Student Notes Summary",
-    "hours_recorded": "[Current + Archived] No. of Hours Recorded"
+    "hours_recorded": "[Current + Archived] No. of Hours Recorded",
+    "foundation_student": "Is this a Foundation Student?"
 }
 
 DEADLINE_FIELDS = {
@@ -252,7 +253,8 @@ def get_students_for_mentor(mentor_name):
                 "expected_meetings": fields.get(STUDENT_FIELDS["expected_meetings"], 0),
                 "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
                 "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
-                "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], "")
+                "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
+                "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], "")
             })
         return students
     except Exception as e:
@@ -518,83 +520,85 @@ def show_dashboard():
 
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
-    st.markdown('<p class="main-header">Assigned Students</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Track onboarding progress for all assigned students</p>', unsafe_allow_html=True)
+    st.markdown("## Students Assigned")
+    st.markdown(
+        "These are the students who have been assigned to you and are still in the onboarding process "
+        "finalizing their application logistics. You can track their progress using the table below."
+    )
+    st.markdown(
+        "**Note: A student has officially completed their onboarding process and confirmed you as a mentor "
+        "only once the 'Student Confirmed Mentor Match?' column says 'Yes'.** Otherwise, they are still "
+        "completing onboarding formalities."
+    )
 
     if not students:
         st.info("No students assigned to you yet.")
         return
 
-    # Summary metrics
-    total = len(students)
-    confirmed = sum(1 for s in students if s["mentor_confirmation"] == "Yes")
-    pending = total - confirmed
+    # Build styled table
+    def badge(text, color):
+        colors = {
+            "green": ("background-color: #DEF7EC; color: #03543F;", text),
+            "yellow": ("background-color: #FEF3C7; color: #92400E;", text),
+            "orange": ("background-color: #FDE8E8; color: #9B1C1C;", text),
+            "gray": ("", text),
+        }
+        style, label = colors.get(color, ("", text))
+        if style:
+            return f'<span style="{style} padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">{label}</span>'
+        return label or "-"
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Assigned", total)
-    with col2:
-        st.metric("Confirmed", confirmed)
-    with col3:
-        st.metric("Pending Confirmation", pending)
+    def format_cell(value):
+        if not value:
+            return "-"
+        val = str(value).strip()
+        if val.lower() == "yes":
+            return badge("Yes", "green")
+        elif val.lower() == "no":
+            return badge("No", "orange")
+        elif "clarification" in val.lower():
+            return badge(val, "orange")
+        return val
 
-    # Debug: Show field mappings
-    with st.expander("🔧 Debug: Field Mappings"):
-        st.markdown("**Summary Metrics:**")
-        st.markdown(f"- **Total Assigned**: Count of students linked via `{STUDENT_FIELDS['mentor']}`")
-        st.markdown(f"- **Confirmed**: Count where `{STUDENT_FIELDS['mentor_confirmation']}` = 'Yes'")
-        st.markdown(f"- **Pending Confirmation**: Total - Confirmed")
-        st.markdown("---")
-        st.markdown("**Student Card Fields:**")
-        st.markdown(f"- **Student Name**: `{STUDENT_FIELDS['name']}`")
-        st.markdown(f"- **Research Area**: `{STUDENT_FIELDS['research_area']}`")
-        st.markdown(f"- **Match Confirmation**: `{STUDENT_FIELDS['mentor_confirmation']}`")
-        st.markdown(f"- **Background Shared**: `{STUDENT_FIELDS['background_shared']}`")
-        st.markdown(f"- **Meetings Completed**: `{STUDENT_FIELDS['completed_meetings']}`")
-        st.markdown(f"- **Expected Meetings**: `{STUDENT_FIELDS['expected_meetings']}`")
+    # Build table rows
+    rows_html = ""
+    for s in students:
+        rows_html += f"""
+        <tr>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB;">{s['name']}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; text-align: center;">{format_cell(s['mentor_confirmation'])}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; text-align: center;">{format_cell(s['background_shared'])}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; text-align: center;">{format_cell(s.get('foundation_student', ''))}</td>
+        </tr>
+        """
 
-    st.markdown("---")
+    record_count = len(students)
+    table_html = f"""
+    <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; margin-top: 1rem;">
+        <div style="padding: 16px 20px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.15rem; font-weight: 600;">Your Assigned Students</span>
+            <span style="background-color: #FEF3C7; color: #92400E; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 500;">{record_count} records</span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #F9FAFB;">
+                    <th style="padding: 12px 16px; text-align: left; font-size: 0.85rem; font-weight: 600; color: #374151; border-bottom: 2px solid #E5E7EB;">Student Name, Cohort, and Program</th>
+                    <th style="padding: 12px 16px; text-align: center; font-size: 0.85rem; font-weight: 600; color: #374151; border-bottom: 2px solid #E5E7EB;">Mentor Confirmed Student Match?</th>
+                    <th style="padding: 12px 16px; text-align: center; font-size: 0.85rem; font-weight: 600; color: #374151; border-bottom: 2px solid #E5E7EB;">Mentor Background Shared with Student?</th>
+                    <th style="padding: 12px 16px; text-align: center; font-size: 0.85rem; font-weight: 600; color: #374151; border-bottom: 2px solid #E5E7EB;">Is this a Foundation Student?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rows_html}
+            </tbody>
+        </table>
+        <div style="padding: 12px 20px; border-top: 1px solid #E5E7EB; font-size: 0.85rem; color: #6B7280;">
+            Show {record_count} records per page
+        </div>
+    </div>
+    """
 
-    # Student list
-    for student in students:
-        with st.container():
-            col1, col2 = st.columns([3, 1])
-
-            with col1:
-                st.markdown(f"#### {student['name']}")
-                st.caption(f"🎯 {student['research_area']}" if student['research_area'] else "Research area not set")
-
-            with col2:
-                # Confirmation status
-                if student["mentor_confirmation"] == "Yes":
-                    st.success("✅ Confirmed")
-                else:
-                    st.warning("⏳ Pending")
-
-            # Onboarding status details
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.markdown("**Match Confirmation**")
-                if student["mentor_confirmation"] == "Yes":
-                    st.markdown('<span class="status-confirmed">Confirmed</span>', unsafe_allow_html=True)
-                else:
-                    st.markdown('<span class="status-pending">Pending</span>', unsafe_allow_html=True)
-
-            with col2:
-                st.markdown("**Background Shared**")
-                if student["background_shared"] == "Yes":
-                    st.markdown('<span class="status-confirmed">Yes</span>', unsafe_allow_html=True)
-                else:
-                    st.markdown('<span class="status-not-sent">Not Yet</span>', unsafe_allow_html=True)
-
-            with col3:
-                st.markdown("**Meetings**")
-                completed = student.get("completed_meetings", 0) or 0
-                expected = student.get("expected_meetings", 0) or 0
-                st.markdown(f"{completed} / {expected} completed")
-
-            st.markdown("---")
+    st.markdown(table_html, unsafe_allow_html=True)
 
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
