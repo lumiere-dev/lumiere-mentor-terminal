@@ -102,7 +102,7 @@ STUDENT_FIELDS = {
     "completed_meetings": "[Current + Archived] No. of Meetings Completed",
     "notes_summary": "Mentor-Student Notes Summary",
     "hours_recorded": "[Current + Archived] No. of Hours Recorded",
-    "foundation_student": "Is this a Foundation Student?"
+    "foundation_student": "Foundation Student"
 }
 
 DEADLINE_FIELDS = {
@@ -535,25 +535,63 @@ def show_assigned_students(students):
         st.info("No students assigned to you yet.")
         return
 
+    import html as html_mod
+
     record_count = len(students)
-    st.markdown(f"**Your Assigned Students** &nbsp; `{record_count} records`")
+    RECORDS_PER_PAGE = 9
 
-    # Build dataframe for display
-    df = pd.DataFrame([
-        {
-            "Student Name, Cohort, and Program": s["name"],
-            "Mentor Confirmed Student Match?": s["mentor_confirmation"] or "-",
-            "Mentor Background Shared with Student?": s["background_shared"] or "-",
-            "Is this a Foundation Student?": s.get("foundation_student", "") or "-",
-        }
-        for s in students
-    ])
-
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True,
+    # Pagination
+    total_pages = max(1, (record_count + RECORDS_PER_PAGE - 1) // RECORDS_PER_PAGE)
+    page = st.selectbox(
+        "Show records per page",
+        range(1, total_pages + 1),
+        format_func=lambda x: f"Page {x} of {total_pages}",
+        label_visibility="collapsed",
+        key="assigned_page",
     )
+    start = (page - 1) * RECORDS_PER_PAGE
+    page_students = students[start:start + RECORDS_PER_PAGE]
+
+    def badge(text):
+        if not text or str(text).strip() == "":
+            return "-"
+        val = str(text).strip()
+        if val.lower() == "yes":
+            return f'<span style="background-color:#DEF7EC;color:#03543F;padding:4px 12px;border-radius:12px;font-size:0.85rem;font-weight:500;">{html_mod.escape(val)}</span>'
+        elif val.lower() == "no":
+            return f'<span style="background-color:#FEE2E2;color:#991B1B;padding:4px 12px;border-radius:12px;font-size:0.85rem;font-weight:500;">{html_mod.escape(val)}</span>'
+        elif "clarification" in val.lower():
+            return f'<span style="background-color:#FDE8E8;color:#9B1C1C;padding:4px 12px;border-radius:12px;font-size:0.85rem;font-weight:500;">{html_mod.escape(val)}</span>'
+        return html_mod.escape(val)
+
+    rows_html = ""
+    for s in page_students:
+        name = html_mod.escape(str(s["name"]))
+        rows_html += f'<tr><td style="padding:12px 16px;border-bottom:1px solid #E5E7EB;">{name}</td>'
+        rows_html += f'<td style="padding:12px 16px;border-bottom:1px solid #E5E7EB;text-align:center;">{badge(s["mentor_confirmation"])}</td>'
+        rows_html += f'<td style="padding:12px 16px;border-bottom:1px solid #E5E7EB;text-align:center;">{badge(s["background_shared"])}</td>'
+        rows_html += f'<td style="padding:12px 16px;border-bottom:1px solid #E5E7EB;text-align:center;">{badge(s.get("foundation_student", ""))}</td></tr>'
+
+    table_html = f'''<div style="background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden;margin-top:1rem;">
+<div style="padding:16px 20px;display:flex;align-items:center;gap:12px;">
+<span style="font-size:1.15rem;font-weight:600;">Your Assigned Students</span>
+<span style="background-color:#FEF3C7;color:#92400E;padding:2px 10px;border-radius:12px;font-size:0.85rem;font-weight:500;">{record_count} records</span>
+</div>
+<table style="width:100%;border-collapse:collapse;">
+<thead><tr style="background-color:#F9FAFB;">
+<th style="padding:12px 16px;text-align:left;font-size:0.85rem;font-weight:600;color:#374151;border-bottom:2px solid #E5E7EB;">Student Name, Cohort, and Program</th>
+<th style="padding:12px 16px;text-align:center;font-size:0.85rem;font-weight:600;color:#374151;border-bottom:2px solid #E5E7EB;">Mentor Confirmed Student Match?</th>
+<th style="padding:12px 16px;text-align:center;font-size:0.85rem;font-weight:600;color:#374151;border-bottom:2px solid #E5E7EB;">Mentor Background Shared with Student?</th>
+<th style="padding:12px 16px;text-align:center;font-size:0.85rem;font-weight:600;color:#374151;border-bottom:2px solid #E5E7EB;">Is this a Foundation Student?</th>
+</tr></thead>
+<tbody>{rows_html}</tbody>
+</table>
+<div style="padding:12px 20px;border-top:1px solid #E5E7EB;font-size:0.85rem;color:#6B7280;">
+Showing {start + 1}–{min(start + RECORDS_PER_PAGE, record_count)} of {record_count} records
+</div>
+</div>'''
+
+    st.markdown(table_html, unsafe_allow_html=True)
 
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
