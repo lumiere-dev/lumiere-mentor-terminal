@@ -466,29 +466,29 @@ def show_login_page():
                     else:
                         st.error("Email not found. Please check your email address.")
 
-        st.markdown("---")
+        # Preview mode for team members (only visible with ?team=true in URL)
+        if st.query_params.get("team") == "true":
+            st.markdown("---")
+            with st.expander("🔍 Team Preview Mode"):
+                st.caption("For team members to preview any mentor's view")
+                with st.form("preview_form"):
+                    preview_email = st.text_input("Mentor's Email", placeholder="Enter mentor email to preview")
+                    admin_key = st.text_input("Admin Key", type="password", placeholder="Enter admin key")
+                    preview_submitted = st.form_submit_button("Preview as Mentor", use_container_width=True)
 
-        # Preview mode for team members
-        with st.expander("🔍 Team Preview Mode"):
-            st.caption("For team members to preview any mentor's view")
-            with st.form("preview_form"):
-                preview_email = st.text_input("Mentor's Email", placeholder="Enter mentor email to preview")
-                admin_key = st.text_input("Admin Key", type="password", placeholder="Enter admin key")
-                preview_submitted = st.form_submit_button("Preview as Mentor", use_container_width=True)
-
-                if preview_submitted:
-                    if admin_key == st.secrets["ADMIN_KEY"]:
-                        mentor = get_mentor_by_email(preview_email)
-                        if mentor:
-                            st.session_state.authenticated = True
-                            st.session_state.mentor_name = mentor["name"]
-                            st.session_state.mentor_email = mentor["email"]
-                            st.session_state.is_preview = True
-                            st.rerun()
+                    if preview_submitted:
+                        if admin_key == st.secrets["ADMIN_KEY"]:
+                            mentor = get_mentor_by_email(preview_email)
+                            if mentor:
+                                st.session_state.authenticated = True
+                                st.session_state.mentor_name = mentor["name"]
+                                st.session_state.mentor_email = mentor["email"]
+                                st.session_state.is_preview = True
+                                st.rerun()
+                            else:
+                                st.error("Mentor email not found.")
                         else:
-                            st.error("Mentor email not found.")
-                    else:
-                        st.error("Invalid admin key.")
+                            st.error("Invalid admin key.")
 
 # MAIN DASHBOARD
 def show_dashboard():
