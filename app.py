@@ -102,7 +102,12 @@ STUDENT_FIELDS = {
     "completed_meetings": "[Current + Archived] No. of Meetings Completed",
     "notes_summary": "Mentor-Student Notes Summary",
     "hours_recorded": "[Current + Archived] No. of Hours Recorded",
-    "foundation_student": "Foundation Student"
+    "foundation_student": "Foundation Student",
+    "tuition_paid": "OB: Full Tuition Paid",
+    "program_manager_email": "Program Manager Email",
+    "revised_final_paper_due": "PM: Student's Revised Final Paper - Due date)",
+    "student_no_shows": "[Current + Archived] No. of Student No Shows in Mentor Meetings",
+    "reason_for_interest": "Reason for Interest in Areas"
 }
 
 DEADLINE_FIELDS = {
@@ -254,7 +259,12 @@ def get_students_for_mentor(mentor_name):
                 "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
                 "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
                 "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
-                "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], "")
+                "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
+                "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
+                "program_manager_email": fields.get(STUDENT_FIELDS["program_manager_email"], ""),
+                "revised_final_paper_due": fields.get(STUDENT_FIELDS["revised_final_paper_due"], ""),
+                "student_no_shows": fields.get(STUDENT_FIELDS["student_no_shows"], 0),
+                "reason_for_interest": fields.get(STUDENT_FIELDS["reason_for_interest"], "")
             })
         return students
     except Exception as e:
@@ -543,30 +553,34 @@ def show_assigned_students(students):
 
     for student in filtered:
         with st.expander(student["name"]):
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
 
             with col1:
                 confirmation = student["mentor_confirmation"] or "—"
+                st.markdown("**Mentor Confirmed Student Match?**")
                 if confirmation == "Yes":
-                    st.markdown("**Mentor Confirmed Student Match?**")
                     st.markdown(':green[Yes]')
                 else:
-                    st.markdown("**Mentor Confirmed Student Match?**")
                     st.markdown(f':orange[{confirmation}]' if confirmation != "—" else confirmation)
 
-            with col2:
                 shared = student["background_shared"] or "—"
+                st.markdown("**Mentor Background Shared with Student?**")
                 if shared == "Yes":
-                    st.markdown("**Mentor Background Shared with Student?**")
                     st.markdown(':green[Yes]')
                 else:
-                    st.markdown("**Mentor Background Shared with Student?**")
                     st.markdown(f':orange[{shared}]' if shared != "—" else shared)
 
-            with col3:
+            with col2:
                 foundation = student.get("foundation_student", "") or "—"
                 st.markdown("**Is this a Foundation Student?**")
                 st.markdown(foundation)
+
+                tuition = student.get("tuition_paid", "") or "—"
+                st.markdown("**Student Confirmed Mentor Match?**")
+                if tuition == "Yes":
+                    st.markdown(':green[Yes]')
+                else:
+                    st.markdown(f':orange[{tuition}]' if tuition != "—" else tuition)
 
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
@@ -631,6 +645,27 @@ def show_student_background(student):
 
         st.markdown("**⏱️ Hours Recorded**")
         st.markdown(format_duration(student.get("hours_recorded", "")))
+
+    st.markdown("---")
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.markdown("**📧 Program Manager Email**")
+        st.markdown(student.get("program_manager_email") or "Not specified")
+
+        st.markdown("**📅 Student's Revised Final Paper Due Date**")
+        st.markdown(format_date(student.get("revised_final_paper_due", "")))
+
+        st.markdown("**🚫 Number of Student No Shows**")
+        st.markdown(str(student.get("student_no_shows", 0) or 0))
+
+    with col4:
+        st.markdown("**📝 Number of Meeting Updates Submitted**")
+        st.markdown(str(student.get("completed_meetings", 0) or 0))
+
+        st.markdown("**💡 Reason for Interest in Areas**")
+        st.markdown(student.get("reason_for_interest") or "Not specified")
 
     if student.get("notes_summary"):
         st.markdown("---")
