@@ -244,15 +244,16 @@ def get_students_for_mentor(mentor_name):
         formula = f"FIND('{mentor_name}', ARRAYJOIN({{Mentor Name}}))"
         records = tables["students"].all(formula=formula)
 
-        # DEBUG: Show actual field names for first record (remove after fixing)
-        if records:
-            paper_fields = [k for k in records[0]["fields"].keys() if "paper" in k.lower() or "due" in k.lower() or "revised" in k.lower()]
-            if paper_fields:
-                st.warning(f"DEBUG - Matching field names: {paper_fields}")
-
         students = []
         for record in records:
             fields = record["fields"]
+
+            # Helper to unwrap Airtable lookup fields (returned as arrays)
+            def unwrap(val, default=""):
+                if isinstance(val, list):
+                    return val[0] if val else default
+                return val if val is not None else default
+
             students.append({
                 "id": record["id"],
                 "name": fields.get(STUDENT_FIELDS["name"], "Unknown"),
@@ -267,10 +268,10 @@ def get_students_for_mentor(mentor_name):
                 "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
                 "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
                 "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
-                "program_manager_email": fields.get(STUDENT_FIELDS["program_manager_email"], ""),
-                "revised_final_paper_due": fields.get(STUDENT_FIELDS["revised_final_paper_due"], ""),
-                "student_no_shows": fields.get(STUDENT_FIELDS["student_no_shows"], 0),
-                "reason_for_interest": fields.get(STUDENT_FIELDS["reason_for_interest"], "")
+                "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
+                "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
+                "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
+                "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], ""))
             })
         return students
     except Exception as e:
@@ -657,10 +658,7 @@ def show_student_background(student):
 
     with col3:
         st.markdown("**📧 Program Manager Email**")
-        pm_email = student.get("program_manager_email") or "Not specified"
-        if isinstance(pm_email, list):
-            pm_email = pm_email[0] if pm_email else "Not specified"
-        st.markdown(pm_email)
+        st.markdown(student.get("program_manager_email") or "Not specified")
 
         st.markdown("**📅 Student's Revised Final Paper Due Date**")
         st.markdown(format_date(student.get("revised_final_paper_due", "")))
