@@ -530,14 +530,12 @@ def show_dashboard():
 
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
-    st.markdown("## Students Assigned")
-    st.markdown(
-        "These are the students who have been assigned to you and are still in the onboarding process "
-        "finalizing their application logistics. You can track their progress using the table below."
-    )
-    st.markdown(
-        "**Note: A student has officially completed their onboarding process and confirmed you as a mentor "
-        "only once the 'Student Confirmed Mentor Match?' column says 'Yes'.** Otherwise, they are still "
+    st.markdown('<p class="main-header">Assigned Students</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Track onboarding progress for your assigned students</p>', unsafe_allow_html=True)
+
+    st.info(
+        "**Note:** A student has officially completed their onboarding process and confirmed you as a mentor "
+        "only once the 'Student Confirmed Mentor Match?' column says 'Yes'. Otherwise, they are still "
         "completing onboarding formalities."
     )
 
@@ -545,7 +543,7 @@ def show_assigned_students(students):
         st.info("No students assigned to you yet.")
         return
 
-    st.markdown(f"**Your Assigned Students** — {len(students)} records")
+    st.markdown(f"**Your Assigned Students** — {len(students)} student{'s' if len(students) != 1 else ''}")
 
     # Student filter
     student_names = ["All Students"] + [s["name"] for s in students]
