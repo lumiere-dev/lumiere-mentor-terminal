@@ -216,6 +216,8 @@ if "is_preview" not in st.session_state:
     st.session_state.is_preview = False
 if "magic_link_sent" not in st.session_state:
     st.session_state.magic_link_sent = False
+if "team_unlocked" not in st.session_state:
+    st.session_state.team_unlocked = False
 
 # Helper functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -466,27 +468,35 @@ def show_login_page():
                     else:
                         st.error("Email not found. Please check your email address.")
 
-        # Preview mode for team members (only visible with ?team=true in URL)
-        if st.query_params.get("team") == "true":
-            st.markdown("---")
-            with st.expander("🔍 Team Preview Mode"):
-                st.caption("For team members to preview any mentor's view")
-                with st.form("preview_form"):
-                    preview_email = st.text_input("Mentor's Email", placeholder="Enter mentor email to preview")
-                    admin_key = st.text_input("Admin Key", type="password", placeholder="Enter admin key")
-                    preview_submitted = st.form_submit_button("Preview as Mentor", use_container_width=True)
+        # Team preview access - small link that gates behind admin key
+        st.markdown("---")
+        if st.session_state.team_unlocked:
+            st.markdown("#### Team Preview Mode")
+            st.caption("Preview any mentor's portal view")
+            with st.form("preview_form"):
+                preview_email = st.text_input("Mentor's Email", placeholder="Enter mentor email to preview")
+                preview_submitted = st.form_submit_button("Preview as Mentor", use_container_width=True)
 
-                    if preview_submitted:
+                if preview_submitted:
+                    mentor = get_mentor_by_email(preview_email)
+                    if mentor:
+                        st.session_state.authenticated = True
+                        st.session_state.mentor_name = mentor["name"]
+                        st.session_state.mentor_email = mentor["email"]
+                        st.session_state.is_preview = True
+                        st.rerun()
+                    else:
+                        st.error("Mentor email not found.")
+        else:
+            with st.expander("Team Access"):
+                with st.form("team_unlock_form"):
+                    admin_key = st.text_input("Admin Key", type="password", placeholder="Enter admin key")
+                    unlock_submitted = st.form_submit_button("Unlock", use_container_width=True)
+
+                    if unlock_submitted:
                         if admin_key == st.secrets["ADMIN_KEY"]:
-                            mentor = get_mentor_by_email(preview_email)
-                            if mentor:
-                                st.session_state.authenticated = True
-                                st.session_state.mentor_name = mentor["name"]
-                                st.session_state.mentor_email = mentor["email"]
-                                st.session_state.is_preview = True
-                                st.rerun()
-                            else:
-                                st.error("Mentor email not found.")
+                            st.session_state.team_unlocked = True
+                            st.rerun()
                         else:
                             st.error("Invalid admin key.")
 
