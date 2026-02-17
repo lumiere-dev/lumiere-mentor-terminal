@@ -207,6 +207,20 @@ st.markdown("""
         margin-bottom: 1rem;
         color: #92400E;
     }
+    /* Dark sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #1A1A2E;
+        color: #FFFFFF;
+    }
+    [data-testid="stSidebar"] * {
+        color: #FFFFFF !important;
+    }
+    [data-testid="stSidebar"] hr {
+        border-color: rgba(255,255,255,0.2);
+    }
+    [data-testid="stSidebar"] .stRadio label {
+        color: #FFFFFF !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
