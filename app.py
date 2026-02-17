@@ -219,6 +219,8 @@ if "magic_link_sent" not in st.session_state:
     st.session_state.magic_link_sent = False
 if "team_unlocked" not in st.session_state:
     st.session_state.team_unlocked = False
+if "selected_student_name" not in st.session_state:
+    st.session_state.selected_student_name = None
 
 # Helper functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -615,28 +617,68 @@ def show_confirmed_students(students):
         st.info("No confirmed students yet. Students will appear here once they confirm the mentor match.")
         return
 
-    # Student selector
-    student_names = [s["name"] for s in confirmed_students]
-    selected_student_name = st.selectbox("Select Student", student_names)
+    # Sort by most recent revised final paper due date (most recent first, empty dates last)
+    confirmed_students.sort(
+        key=lambda s: s.get("revised_final_paper_due") or "0000-00-00",
+        reverse=True
+    )
 
-    selected_student = next((s for s in confirmed_students if s["name"] == selected_student_name), None)
+    # If a student is selected, show their profile
+    if "selected_student_name" in st.session_state and st.session_state.selected_student_name:
+        selected = next(
+            (s for s in confirmed_students if s["name"] == st.session_state.selected_student_name),
+            None
+        )
+        if selected:
+            if st.button("← Back to Student List"):
+                st.session_state.selected_student_name = None
+                st.rerun()
 
-    if not selected_student:
-        return
+            st.markdown(f"## {selected['name']}")
+            st.markdown("---")
 
-    st.markdown("---")
+            tab1, tab2, tab3 = st.tabs(["📝 Background", "📅 Deadlines", "📁 Submissions"])
+            with tab1:
+                show_student_background(selected)
+            with tab2:
+                show_student_deadlines(selected)
+            with tab3:
+                show_student_submissions(selected)
+            return
 
-    # Tabs for different sections
-    tab1, tab2, tab3 = st.tabs(["📝 Background", "📅 Deadlines", "📁 Submissions"])
+    # Helper text
+    st.info(
+        "This list contains all the students you are or have worked with "
+        "(including those who have since completed their program).\n\n"
+        "**Note:** The student list is ordered based on the most recent Revised Final Paper due date. "
+        "In case you have been introduced to a student but cannot find them on this list, "
+        "please use the search bar to locate them, otherwise reach out to your program manager for assistance!"
+    )
 
-    with tab1:
-        show_student_background(selected_student)
+    # Filter by student name
+    search = st.text_input("🔍 Search by student name", key="confirmed_search")
+    if search:
+        confirmed_students = [
+            s for s in confirmed_students
+            if search.lower() in s["name"].lower()
+        ]
 
-    with tab2:
-        show_student_deadlines(selected_student)
+    st.markdown(f"**{len(confirmed_students)}** student{'s' if len(confirmed_students) != 1 else ''}")
 
-    with tab3:
-        show_student_submissions(selected_student)
+    # Student list
+    for student in confirmed_students:
+        col1, col2, col3 = st.columns([3, 2, 2])
+        with col1:
+            if st.button(student["name"], key=f"student_{student['id']}", use_container_width=True):
+                st.session_state.selected_student_name = student["name"]
+                st.rerun()
+        with col2:
+            pm_email = student.get("program_manager_email") or "—"
+            st.caption(f"PM: {pm_email}")
+        with col3:
+            due = format_date(student.get("revised_final_paper_due", ""))
+            st.caption(f"Final Paper Due: {due}")
+        st.markdown("---")
 
 def show_student_background(student):
     st.markdown("### Student Background")
