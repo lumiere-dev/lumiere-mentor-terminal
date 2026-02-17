@@ -146,7 +146,7 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .student-card {
-        background: #2A2A3E;
+        background: #3A3A52;
         border-radius: 12px;
         padding: 1.5rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -154,7 +154,7 @@ st.markdown("""
         border-left: 4px solid #BE1E2D;
     }
     .status-confirmed {
-        background-color: #1A3D2E;
+        background-color: #2A4D3E;
         color: #6EE7B7;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -162,7 +162,7 @@ st.markdown("""
         font-weight: 500;
     }
     .status-pending {
-        background-color: #3D3520;
+        background-color: #4D4530;
         color: #FCD34D;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -170,7 +170,7 @@ st.markdown("""
         font-weight: 500;
     }
     .status-not-sent {
-        background-color: #3D1F1F;
+        background-color: #4D2F2F;
         color: #FCA5A5;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
@@ -184,19 +184,19 @@ st.markdown("""
         color: white;
     }
     .deadline-submitted {
-        background-color: #1A3D2E;
+        background-color: #2A4D3E;
         border-left: 4px solid #10B981;
     }
     .deadline-pending {
-        background-color: #3D3520;
+        background-color: #4D4530;
         border-left: 4px solid #F59E0B;
     }
     .deadline-overdue {
-        background-color: #3D1F1F;
+        background-color: #4D2F2F;
         border-left: 4px solid #EF4444;
     }
     .preview-banner {
-        background-color: #3D3520;
+        background-color: #4D4530;
         border: 1px solid #F59E0B;
         border-radius: 8px;
         padding: 0.75rem 1rem;
