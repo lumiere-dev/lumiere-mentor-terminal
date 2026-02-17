@@ -514,13 +514,16 @@ def show_login_page():
             color: #FFFFFF !important;
             background-color: rgba(255,255,255,0.1) !important;
         }
-        .stApp .stButton button {
-            background-color: #BE1E2D;
+        .stApp button {
+            background-color: #BE1E2D !important;
             color: #FFFFFF !important;
-            border: none;
+            border: none !important;
         }
-        .stApp .stButton button:hover {
-            background-color: #8B1520;
+        .stApp button:hover {
+            background-color: #8B1520 !important;
+        }
+        .stApp button p {
+            color: #FFFFFF !important;
         }
     </style>
     """, unsafe_allow_html=True)
