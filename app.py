@@ -499,7 +499,7 @@ def show_login_page():
     st.markdown("""
     <style>
         .stApp {
-            background-color: #1A3A5C;
+            background-color: #1A1A2E;
         }
         .main-header {
             color: #FFFFFF !important;
@@ -507,8 +507,20 @@ def show_login_page():
         .sub-header {
             color: #CBD5E1 !important;
         }
-        .stApp h3, .stApp p, .stApp label, .stApp span {
+        .stApp h3, .stApp p, .stApp label, .stApp span, .stApp div {
             color: #FFFFFF !important;
+        }
+        .stApp input {
+            color: #FFFFFF !important;
+            background-color: rgba(255,255,255,0.1) !important;
+        }
+        .stApp .stButton button {
+            background-color: #BE1E2D;
+            color: #FFFFFF !important;
+            border: none;
+        }
+        .stApp .stButton button:hover {
+            background-color: #8B1520;
         }
     </style>
     """, unsafe_allow_html=True)
