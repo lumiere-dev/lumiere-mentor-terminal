@@ -643,15 +643,13 @@ def show_confirmed_students(students):
             st.markdown(f"## {selected['name']}")
             st.markdown("---")
 
-            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Deadlines", "📁 Submissions"])
+            tab1, tab2, tab3 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Deadlines & Submissions"])
             with tab1:
                 show_student_background(selected)
             with tab2:
                 show_mentor_meeting_summary(selected)
             with tab3:
-                show_student_deadlines(selected)
-            with tab4:
-                show_student_submissions(selected)
+                show_student_deadlines_and_submissions(selected)
             return
 
     # Helper text
@@ -762,8 +760,8 @@ def show_student_background(student):
         formatted_notes = format_notes_summary(student["notes_summary"])
         st.markdown(formatted_notes)
 
-def show_student_deadlines(student):
-    st.markdown("### Program Deadlines")
+def show_student_deadlines_and_submissions(student):
+    st.markdown("### Deadlines & Submissions")
 
     deadlines = get_deadlines_for_student(student["name"])
 
@@ -776,15 +774,12 @@ def show_student_deadlines(student):
         due_date = deadline["due_date"]
         overdue = is_overdue(due_date, status)
 
-        # Determine styling
+        # Determine icon
         if status == "Submitted":
-            container_class = "deadline-submitted"
             icon = "✅"
         elif overdue:
-            container_class = "deadline-overdue"
             icon = "⚠️"
         else:
-            container_class = "deadline-pending"
             icon = "📅"
 
         with st.container():
@@ -804,42 +799,24 @@ def show_student_deadlines(student):
                 else:
                     st.warning("Not Submitted")
 
+            # Show attachments inline if any
+            if deadline.get("submissions"):
+                for field_name, value in deadline["submissions"].items():
+                    if isinstance(value, list):
+                        for attachment in value:
+                            if isinstance(attachment, dict):
+                                url = attachment.get("url", "")
+                                filename = attachment.get("filename", "Download")
+                                if url:
+                                    st.markdown(f"  📎 [{filename}]({url})")
+                            else:
+                                st.markdown(f"  📎 {attachment}")
+                    elif isinstance(value, str) and value.startswith("http"):
+                        st.markdown(f"  📎 [View Submission]({value})")
+                    else:
+                        st.markdown(f"  📄 {value}")
+
             st.markdown("---")
-
-def show_student_submissions(student):
-    st.markdown("### Submission Files")
-
-    deadlines = get_deadlines_for_student(student["name"])
-
-    has_submissions = False
-
-    for deadline in deadlines:
-        if deadline.get("submissions"):
-            for field_name, value in deadline["submissions"].items():
-                has_submissions = True
-
-                st.markdown(f"**{deadline['type']}**")
-
-                # Handle different types of submission values
-                if isinstance(value, list):
-                    # Attachments are usually a list of dicts with url, filename
-                    for attachment in value:
-                        if isinstance(attachment, dict):
-                            url = attachment.get("url", "")
-                            filename = attachment.get("filename", "Download")
-                            if url:
-                                st.markdown(f"📎 [{filename}]({url})")
-                        else:
-                            st.markdown(f"📎 {attachment}")
-                elif isinstance(value, str) and value.startswith("http"):
-                    st.markdown(f"📎 [View Submission]({value})")
-                else:
-                    st.markdown(f"📄 {value}")
-
-                st.markdown("---")
-
-    if not has_submissions:
-        st.info("No submissions available yet.")
 
 # Main app logic
 def main():
