@@ -608,7 +608,7 @@ def show_assigned_students(students):
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">View backgrounds, deadlines, and submissions</p>', unsafe_allow_html=True)
+
 
     # Filter to confirmed students only
     confirmed_students = [s for s in students if s["mentor_confirmation"] == "Yes"]
@@ -656,12 +656,10 @@ def show_confirmed_students(students):
     )
 
     # Filter by student name
-    search = st.text_input("🔍 Search by student name", key="confirmed_search")
-    if search:
-        confirmed_students = [
-            s for s in confirmed_students
-            if search.lower() in s["name"].lower()
-        ]
+    student_names = ["All Students"] + [s["name"] for s in confirmed_students]
+    selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
+    if selected_filter != "All Students":
+        confirmed_students = [s for s in confirmed_students if s["name"] == selected_filter]
 
     st.markdown(f"**{len(confirmed_students)}** student{'s' if len(confirmed_students) != 1 else ''}")
 
