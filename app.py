@@ -496,6 +496,22 @@ def check_magic_link_token():
 
 # LOGIN PAGE
 def show_login_page():
+    st.markdown("""
+    <style>
+        .stApp {
+            background-color: #1A3A5C;
+        }
+        .main-header {
+            color: #FFFFFF !important;
+        }
+        .sub-header {
+            color: #CBD5E1 !important;
+        }
+        .stApp h3, .stApp p, .stApp label, .stApp span {
+            color: #FFFFFF !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     st.image("assets/lumiere_logo.png", width=300)
     st.markdown('<p class="main-header">Lumiere Mentor Portal</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Access your student dashboard</p>', unsafe_allow_html=True)
