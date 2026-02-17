@@ -511,8 +511,8 @@ def show_login_page():
             color: #FFFFFF !important;
         }
         .stApp input {
-            color: #FFFFFF !important;
-            background-color: rgba(255,255,255,0.1) !important;
+            color: #000000 !important;
+            background-color: #FFFFFF !important;
         }
         .stApp button {
             background-color: #DC1E35 !important;
@@ -541,7 +541,8 @@ def show_login_page():
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-        st.markdown("### Sign In")
+        st.markdown("### Email Address")
+        st.markdown("Sign in with your registered email.")
 
         # Check if magic link was just sent
         if st.session_state.magic_link_sent:
@@ -553,8 +554,6 @@ def show_login_page():
         else:
             # Regular mentor login with magic link
             with st.form("login_form"):
-                st.markdown("**Email Address**")
-                st.markdown("Please use the email address that you've shared with our team.")
                 email = st.text_input("Email Address", label_visibility="collapsed")
                 submitted = st.form_submit_button("Send Magic Link", use_container_width=True)
 
