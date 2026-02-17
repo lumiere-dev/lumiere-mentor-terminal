@@ -685,6 +685,29 @@ def show_confirmed_students(students):
         st.markdown("---")
 
 def show_student_background(student):
+    st.markdown("### Mentor Meeting Summary")
+
+    col_m1, col_m2, col_m3 = st.columns(3)
+
+    with col_m1:
+        st.markdown("**📊 Meetings Completed**")
+        completed = student.get("completed_meetings", 0) or 0
+        expected = student.get("expected_meetings", 0) or 0
+        if expected > 0:
+            st.progress(completed / expected)
+            st.caption(f"{completed} of {expected} meetings completed")
+        else:
+            st.markdown("No meetings scheduled")
+
+    with col_m2:
+        st.markdown("**⏱️ Hours Recorded**")
+        st.markdown(format_duration(student.get("hours_recorded", "")))
+
+    with col_m3:
+        st.markdown("**🚫 Number of Student No Shows**")
+        st.markdown(str(student.get("student_no_shows", 0) or 0))
+
+    st.markdown("---")
     st.markdown("### Student Background")
 
     col1, col2 = st.columns(2)
@@ -700,18 +723,8 @@ def show_student_background(student):
         st.markdown("**🔬 Research Area**")
         st.markdown(student["research_area"] or "Not specified")
 
-        st.markdown("**📊 Meetings Progress**")
-        completed = student.get("completed_meetings", 0) or 0
-        expected = student.get("expected_meetings", 0) or 0
-        if expected > 0:
-            progress = completed / expected
-            st.progress(progress)
-            st.caption(f"{completed} of {expected} meetings completed")
-        else:
-            st.markdown("No meetings scheduled")
-
-        st.markdown("**⏱️ Hours Recorded**")
-        st.markdown(format_duration(student.get("hours_recorded", "")))
+        st.markdown("**💡 Reason for Interest in Areas**")
+        st.markdown(student.get("reason_for_interest") or "Not specified")
 
     st.markdown("---")
 
@@ -721,18 +734,9 @@ def show_student_background(student):
         st.markdown("**📧 Program Manager Email**")
         st.markdown(student.get("program_manager_email") or "Not specified")
 
+    with col4:
         st.markdown("**📅 Student's Revised Final Paper Due Date**")
         st.markdown(format_date(student.get("revised_final_paper_due", "")))
-
-        st.markdown("**🚫 Number of Student No Shows**")
-        st.markdown(str(student.get("student_no_shows", 0) or 0))
-
-    with col4:
-        st.markdown("**📝 Number of Meeting Updates Submitted**")
-        st.markdown(str(student.get("completed_meetings", 0) or 0))
-
-        st.markdown("**💡 Reason for Interest in Areas**")
-        st.markdown(student.get("reason_for_interest") or "Not specified")
 
     st.markdown("---")
     st.markdown("**🏷️ White Label or Partner Program**")
