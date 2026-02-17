@@ -507,7 +507,7 @@ def show_login_page():
         .sub-header {
             color: #CBD5E1 !important;
         }
-        .stApp h3, .stApp p, .stApp label, .stApp span, .stApp div {
+        .stApp h3, .stApp p, .stApp label, .stApp span {
             color: #FFFFFF !important;
         }
         .stApp input {
@@ -515,14 +515,21 @@ def show_login_page():
             background-color: rgba(255,255,255,0.1) !important;
         }
         .stApp button {
-            background-color: #BE1E2D !important;
+            background-color: #DC1E35 !important;
             color: #FFFFFF !important;
             border: none !important;
         }
         .stApp button:hover {
-            background-color: #8B1520 !important;
+            background-color: #B01829 !important;
         }
         .stApp button p {
+            color: #FFFFFF !important;
+        }
+        .stApp details {
+            background-color: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+        }
+        .stApp details summary, .stApp details summary * {
             color: #FFFFFF !important;
         }
     </style>
