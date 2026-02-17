@@ -108,9 +108,9 @@ STUDENT_FIELDS = {
     "revised_final_paper_due": "PM: Student's Revised Final Paper - Due date",
     "student_no_shows": "[Current + Archived] No. of Student No Shows in Mentor Meetings",
     "reason_for_interest": "Reason for Interest in Areas",
-    "white_label": "White Label",
-    "previous_coursework": "Previous Coursework/Experience in Research Area",
-    "interview_notes": "Interview Notes"
+    "white_label": "White Label or Partner Program",
+    "previous_coursework": "Previous Coursework",
+    "interview_notes": "Interview Notes For The Mentor"
 }
 
 DEADLINE_FIELDS = {
@@ -736,17 +736,17 @@ def show_student_background(student):
 
     if student.get("white_label"):
         st.markdown("---")
-        st.markdown("**🏷️ White Label**")
+        st.markdown("**🏷️ White Label or Partner Program**")
         st.markdown(student.get("white_label"))
 
     if student.get("previous_coursework"):
         st.markdown("---")
-        st.markdown("**📚 Previous Coursework/Experience in Research Area**")
+        st.markdown("**📚 Previous Coursework**")
         st.markdown(student.get("previous_coursework"))
 
     if student.get("interview_notes"):
         st.markdown("---")
-        st.markdown("**🗒️ Interview Notes**")
+        st.markdown("**🗒️ Interview Notes For The Mentor**")
         st.markdown(student.get("interview_notes"))
 
     if student.get("notes_summary"):
