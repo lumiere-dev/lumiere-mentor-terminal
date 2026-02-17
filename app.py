@@ -439,6 +439,7 @@ def check_magic_link_token():
 
 # LOGIN PAGE
 def show_login_page():
+    st.image("assets/lumiere_logo.png", width=300)
     st.markdown('<p class="main-header">Lumiere Mentor Portal</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Access your student dashboard</p>', unsafe_allow_html=True)
 
@@ -505,6 +506,7 @@ def show_login_page():
 def show_dashboard():
     # Sidebar
     with st.sidebar:
+        st.image("assets/lumiere_logo.png", width=200)
         st.markdown(f"### Welcome, {st.session_state.mentor_name}")
         st.caption(st.session_state.mentor_email)
 
