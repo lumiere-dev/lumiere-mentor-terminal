@@ -233,6 +233,29 @@ st.markdown("""
         background-color: rgba(255,255,255,0.2);
         border-color: rgba(255,255,255,0.5);
     }
+    /* Rectangular nav style for sidebar radio */
+    [data-testid="stSidebar"] .stRadio > div {
+        gap: 0.25rem !important;
+    }
+    [data-testid="stSidebar"] .stRadio > div > label {
+        background-color: transparent !important;
+        border-radius: 6px !important;
+        padding: 0.6rem 1rem !important;
+        margin: 0 !important;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    [data-testid="stSidebar"] .stRadio > div > label:hover {
+        background-color: rgba(255,255,255,0.1) !important;
+    }
+    [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
+        background-color: rgba(255,255,255,0.15) !important;
+        border-left: 3px solid #DC1E35 !important;
+    }
+    /* Hide radio circle */
+    [data-testid="stSidebar"] .stRadio > div > label > div:first-child {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
