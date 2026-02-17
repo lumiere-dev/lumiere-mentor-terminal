@@ -643,12 +643,14 @@ def show_confirmed_students(students):
             st.markdown(f"## {selected['name']}")
             st.markdown("---")
 
-            tab1, tab2, tab3 = st.tabs(["🎓 Student Background", "📅 Deadlines", "📁 Submissions"])
+            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Deadlines", "📁 Submissions"])
             with tab1:
                 show_student_background(selected)
             with tab2:
-                show_student_deadlines(selected)
+                show_mentor_meeting_summary(selected)
             with tab3:
+                show_student_deadlines(selected)
+            with tab4:
                 show_student_submissions(selected)
             return
 
@@ -684,7 +686,7 @@ def show_confirmed_students(students):
             st.caption(f"Revised Final Paper Due Date: {due}")
         st.markdown("---")
 
-def show_student_background(student):
+def show_mentor_meeting_summary(student):
     st.markdown("### Mentor Meeting Summary")
 
     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
@@ -711,7 +713,7 @@ def show_student_background(student):
         st.markdown("**🚫 Number of Student No Shows**")
         st.markdown(str(student.get("student_no_shows", 0) or 0))
 
-    st.markdown("---")
+def show_student_background(student):
     st.markdown("### Student Background")
 
     col1, col2 = st.columns(2)
