@@ -141,41 +141,41 @@ st.markdown("""
     .main-header {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #FFFFFF;
+        color: #333333;
         margin-bottom: 0.5rem;
     }
     .sub-header {
         font-size: 1.1rem;
-        color: #B0B0B0;
+        color: #666666;
         margin-bottom: 2rem;
     }
     .student-card {
-        background: #3A3A52;
+        background: #FFFFFF;
         border-radius: 12px;
         padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
         border-left: 4px solid #BE1E2D;
     }
     .status-confirmed {
-        background-color: #2A4D3E;
-        color: #6EE7B7;
+        background-color: #ECFDF5;
+        color: #065F46;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
     }
     .status-pending {
-        background-color: #4D4530;
-        color: #FCD34D;
+        background-color: #FFFBEB;
+        color: #92400E;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
     }
     .status-not-sent {
-        background-color: #4D2F2F;
-        color: #FCA5A5;
+        background-color: #FEF2F2;
+        color: #991B1B;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.85rem;
@@ -188,24 +188,24 @@ st.markdown("""
         color: white;
     }
     .deadline-submitted {
-        background-color: #2A4D3E;
+        background-color: #ECFDF5;
         border-left: 4px solid #10B981;
     }
     .deadline-pending {
-        background-color: #4D4530;
+        background-color: #FFFBEB;
         border-left: 4px solid #F59E0B;
     }
     .deadline-overdue {
-        background-color: #4D2F2F;
+        background-color: #FEF2F2;
         border-left: 4px solid #EF4444;
     }
     .preview-banner {
-        background-color: #4D4530;
+        background-color: #FFFBEB;
         border: 1px solid #F59E0B;
         border-radius: 8px;
         padding: 0.75rem 1rem;
         margin-bottom: 1rem;
-        color: #FCD34D;
+        color: #92400E;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -537,7 +537,7 @@ def show_login_page():
 def show_dashboard():
     # Sidebar
     with st.sidebar:
-        st.image("assets/lumiere_logo.png", width=200)
+        st.image("assets/lumiere_logo_symbol.png", width=80)
         st.markdown(f"### Welcome, {st.session_state.mentor_name}")
         st.caption(st.session_state.mentor_email)
 
