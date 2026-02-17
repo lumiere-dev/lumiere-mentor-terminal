@@ -672,10 +672,10 @@ def show_confirmed_students(students):
                 st.rerun()
         with col2:
             pm_email = student.get("program_manager_email") or "—"
-            st.caption(f"PM: {pm_email}")
+            st.caption(f"Program Manager Email: {pm_email}")
         with col3:
             due = format_date(student.get("revised_final_paper_due", ""))
-            st.caption(f"Final Paper Due: {due}")
+            st.caption(f"Revised Final Paper Due Date: {due}")
         st.markdown("---")
 
 def show_student_background(student):
