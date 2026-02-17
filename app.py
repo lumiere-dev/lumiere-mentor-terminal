@@ -7,8 +7,8 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 # Page config
 st.set_page_config(
-    page_title="Mentor Portal",
-    page_icon="👨‍🏫",
+    page_title="Lumiere Mentor Portal",
+    page_icon="🔥",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -63,12 +63,12 @@ def send_magic_link(email, mentor_name):
             "subject": "Your Mentor Portal Login Link",
             "html": f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #1E3A5F;">Welcome to the Mentor Portal</h2>
+                <h2 style="color: #BE1E2D;">Welcome to the Lumiere Mentor Portal</h2>
                 <p>Hi {mentor_name},</p>
                 <p>Click the button below to access your mentor dashboard:</p>
                 <p style="margin: 30px 0;">
                     <a href="{magic_link}"
-                       style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+                       style="background: linear-gradient(135deg, #BE1E2D 0%, #8B1520 100%);
                               color: white;
                               padding: 12px 30px;
                               text-decoration: none;
@@ -137,70 +137,71 @@ st.markdown("""
     .main-header {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #1E3A5F;
+        color: #FFFFFF;
         margin-bottom: 0.5rem;
     }
     .sub-header {
         font-size: 1.1rem;
-        color: #64748B;
+        color: #B0B0B0;
         margin-bottom: 2rem;
     }
     .student-card {
-        background: white;
+        background: #2A2A3E;
         border-radius: 12px;
         padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         margin-bottom: 1rem;
-        border-left: 4px solid #4F46E5;
+        border-left: 4px solid #BE1E2D;
     }
     .status-confirmed {
-        background-color: #DEF7EC;
-        color: #03543F;
+        background-color: #1A3D2E;
+        color: #6EE7B7;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
     }
     .status-pending {
-        background-color: #FEF3C7;
-        color: #92400E;
+        background-color: #3D3520;
+        color: #FCD34D;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
     }
     .status-not-sent {
-        background-color: #FEE2E2;
-        color: #991B1B;
+        background-color: #3D1F1F;
+        color: #FCA5A5;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
     }
     .metric-card {
-        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        background: linear-gradient(135deg, #BE1E2D 0%, #8B1520 100%);
         border-radius: 12px;
         padding: 1.5rem;
         color: white;
     }
     .deadline-submitted {
-        background-color: #DEF7EC;
+        background-color: #1A3D2E;
         border-left: 4px solid #10B981;
     }
     .deadline-pending {
-        background-color: #FEF3C7;
+        background-color: #3D3520;
         border-left: 4px solid #F59E0B;
     }
     .deadline-overdue {
-        background-color: #FEE2E2;
+        background-color: #3D1F1F;
         border-left: 4px solid #EF4444;
     }
     .preview-banner {
-        background-color: #FEF3C7;
+        background-color: #3D3520;
         border: 1px solid #F59E0B;
         border-radius: 8px;
         padding: 0.75rem 1rem;
         margin-bottom: 1rem;
+        color: #FCD34D;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -438,7 +439,7 @@ def check_magic_link_token():
 
 # LOGIN PAGE
 def show_login_page():
-    st.markdown('<p class="main-header">Mentor Portal</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Lumiere Mentor Portal</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Access your student dashboard</p>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
