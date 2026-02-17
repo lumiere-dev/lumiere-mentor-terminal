@@ -848,7 +848,7 @@ def show_student_background(student):
         st.markdown(str(student["graduation_year"]) if student["graduation_year"] else "Not specified")
 
     with col2:
-        st.markdown("**🔬 Research Area**")
+        st.markdown("**🔬 Research Area - First Preference**")
         st.markdown(student["research_area"] or "Not specified")
 
         st.markdown("**💡 Reason for Interest in Areas**")
