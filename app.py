@@ -734,20 +734,17 @@ def show_student_background(student):
         st.markdown("**💡 Reason for Interest in Areas**")
         st.markdown(student.get("reason_for_interest") or "Not specified")
 
-    if student.get("white_label"):
-        st.markdown("---")
-        st.markdown("**🏷️ White Label or Partner Program**")
-        st.markdown(student.get("white_label"))
+    st.markdown("---")
+    st.markdown("**🏷️ White Label or Partner Program**")
+    st.markdown(student.get("white_label") or "Not specified")
 
-    if student.get("previous_coursework"):
-        st.markdown("---")
-        st.markdown("**📚 Previous Coursework**")
-        st.markdown(student.get("previous_coursework"))
+    st.markdown("---")
+    st.markdown("**📚 Previous Coursework**")
+    st.markdown(student.get("previous_coursework") or "Not specified")
 
-    if student.get("interview_notes"):
-        st.markdown("---")
-        st.markdown("**🗒️ Interview Notes For The Mentor**")
-        st.markdown(student.get("interview_notes"))
+    st.markdown("---")
+    st.markdown("**🗒️ Interview Notes For The Mentor**")
+    st.markdown(student.get("interview_notes") or "Not specified")
 
     if student.get("notes_summary"):
         st.markdown("---")
