@@ -212,14 +212,26 @@ st.markdown("""
         background-color: #1A1A2E;
         color: #FFFFFF;
     }
-    [data-testid="stSidebar"] * {
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label {
         color: #FFFFFF !important;
     }
     [data-testid="stSidebar"] hr {
         border-color: rgba(255,255,255,0.2);
     }
-    [data-testid="stSidebar"] .stRadio label {
+    [data-testid="stSidebar"] .stButton button {
+        background-color: rgba(255,255,255,0.1);
         color: #FFFFFF !important;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    [data-testid="stSidebar"] .stButton button:hover {
+        background-color: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.5);
     }
 </style>
 """, unsafe_allow_html=True)
