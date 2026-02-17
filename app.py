@@ -868,7 +868,7 @@ def show_student_background(student):
 
     st.markdown("---")
     st.markdown("**🏷️ White Label or Partner Program**")
-    st.markdown(student.get("white_label") or "Not specified")
+    st.markdown(student.get("white_label") or "No")
 
     st.markdown("---")
     st.markdown("**📚 Previous Coursework**")
