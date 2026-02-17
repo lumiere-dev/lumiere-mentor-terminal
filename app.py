@@ -26,7 +26,8 @@ def get_tables():
     return {
         "students": base.table(st.secrets["STUDENT_TABLE"]),
         "deadlines": base.table(st.secrets["DEADLINES_TABLE"]),
-        "mentors": base.table(st.secrets["MENTOR_TABLE"])
+        "mentors": base.table(st.secrets["MENTOR_TABLE"]),
+        "progress": base.table(st.secrets["PROGRESS_TABLE"])
     }
 
 # Magic Link Authentication
@@ -324,6 +325,28 @@ def get_deadlines_for_student(student_name):
         return deadlines
     except Exception as e:
         st.error(f"Error fetching deadlines: {e}")
+        return []
+
+def get_meeting_notes_for_student(student_name):
+    """Get meeting notes from the progress/evaluations table for a student"""
+    tables = get_tables()
+    try:
+        name_part = student_name.split('|')[0].strip()
+        formula = f"AND(FIND('{name_part}', {{Mentor Student Meeting Key}}), {{Type of Record}} = 'Mentor Update')"
+        records = tables["progress"].all(formula=formula)
+
+        notes = []
+        for record in records:
+            fields = record["fields"]
+            notes.append({
+                "date": fields.get("Date of meeting", ""),
+                "notes": fields.get("Meeting Notes Between Mentor & Student", "")
+            })
+
+        notes.sort(key=lambda x: x["date"] or "0000-00-00", reverse=True)
+        return notes
+    except Exception as e:
+        st.error(f"Error fetching meeting notes: {e}")
         return []
 
 def format_duration(value):
@@ -711,6 +734,19 @@ def show_mentor_meeting_summary(student):
         st.markdown("**🚫 Number of Student No Shows**")
         st.markdown(str(student.get("student_no_shows", 0) or 0))
 
+    st.markdown("---")
+    st.markdown("### Meeting Notes")
+
+    meeting_notes = get_meeting_notes_for_student(student["name"])
+
+    if not meeting_notes:
+        st.info("No meeting notes found for this student.")
+    else:
+        for note in meeting_notes:
+            date_str = format_date(note["date"]) if note["date"] else "No date"
+            with st.expander(f"📅 {date_str}"):
+                st.markdown(note["notes"] or "No notes recorded.")
+
 def show_student_background(student):
     st.markdown("### Student Background")
 
@@ -753,12 +789,6 @@ def show_student_background(student):
     st.markdown("---")
     st.markdown("**🗒️ Interview Notes For The Mentor**")
     st.markdown(student.get("interview_notes") or "Not specified")
-
-    if student.get("notes_summary"):
-        st.markdown("---")
-        st.markdown("**📝 Notes Summary**")
-        formatted_notes = format_notes_summary(student["notes_summary"])
-        st.markdown(formatted_notes)
 
 def show_student_deadlines_and_submissions(student):
     st.markdown("### Deadlines & Submissions")
