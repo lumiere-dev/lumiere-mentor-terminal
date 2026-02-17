@@ -107,7 +107,10 @@ STUDENT_FIELDS = {
     "program_manager_email": "Program Manager Email",
     "revised_final_paper_due": "PM: Student's Revised Final Paper - Due date",
     "student_no_shows": "[Current + Archived] No. of Student No Shows in Mentor Meetings",
-    "reason_for_interest": "Reason for Interest in Areas"
+    "reason_for_interest": "Reason for Interest in Areas",
+    "white_label": "White Label",
+    "previous_coursework": "Previous Coursework/Experience in Research Area",
+    "interview_notes": "Interview Notes"
 }
 
 DEADLINE_FIELDS = {
@@ -276,7 +279,10 @@ def get_students_for_mentor(mentor_name):
                 "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
                 "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
                 "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
-                "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], ""))
+                "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
+                "white_label": unwrap(fields.get(STUDENT_FIELDS["white_label"], "")),
+                "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
+                "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], ""))
             })
         return students
     except Exception as e:
@@ -637,7 +643,7 @@ def show_confirmed_students(students):
             st.markdown(f"## {selected['name']}")
             st.markdown("---")
 
-            tab1, tab2, tab3 = st.tabs(["📝 Background", "📅 Deadlines", "📁 Submissions"])
+            tab1, tab2, tab3 = st.tabs(["🎓 Student Background", "📅 Deadlines", "📁 Submissions"])
             with tab1:
                 show_student_background(selected)
             with tab2:
@@ -727,6 +733,21 @@ def show_student_background(student):
 
         st.markdown("**💡 Reason for Interest in Areas**")
         st.markdown(student.get("reason_for_interest") or "Not specified")
+
+    if student.get("white_label"):
+        st.markdown("---")
+        st.markdown("**🏷️ White Label**")
+        st.markdown(student.get("white_label"))
+
+    if student.get("previous_coursework"):
+        st.markdown("---")
+        st.markdown("**📚 Previous Coursework/Experience in Research Area**")
+        st.markdown(student.get("previous_coursework"))
+
+    if student.get("interview_notes"):
+        st.markdown("---")
+        st.markdown("**🗒️ Interview Notes**")
+        st.markdown(student.get("interview_notes"))
 
     if student.get("notes_summary"):
         st.markdown("---")
