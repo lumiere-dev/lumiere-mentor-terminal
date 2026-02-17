@@ -489,7 +489,7 @@ def show_login_page():
         else:
             # Regular mentor login with magic link
             with st.form("login_form"):
-                email = st.text_input("Email Address", placeholder="Enter your mentor email")
+                email = st.text_input("Email Address", placeholder="Enter your mentor email", help="Please use the same email address you provided to Lumiere.")
                 submitted = st.form_submit_button("Send Magic Link", use_container_width=True)
 
                 if submitted and email:
