@@ -687,7 +687,7 @@ def show_confirmed_students(students):
 def show_student_background(student):
     st.markdown("### Mentor Meeting Summary")
 
-    col_m1, col_m2, col_m3 = st.columns(3)
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
 
     with col_m1:
         st.markdown("**📊 Meetings Completed**")
@@ -700,10 +700,14 @@ def show_student_background(student):
             st.markdown("No meetings scheduled")
 
     with col_m2:
+        st.markdown("**📋 Required Meetings for Program**")
+        st.markdown(str(student.get("expected_meetings", 0) or 0))
+
+    with col_m3:
         st.markdown("**⏱️ Hours Recorded**")
         st.markdown(format_duration(student.get("hours_recorded", "")))
 
-    with col_m3:
+    with col_m4:
         st.markdown("**🚫 Number of Student No Shows**")
         st.markdown(str(student.get("student_no_shows", 0) or 0))
 
