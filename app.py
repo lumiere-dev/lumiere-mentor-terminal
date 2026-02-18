@@ -882,7 +882,7 @@ def show_confirmed_students(students):
 
     # Helper text
     st.info(
-        "This list contains all the students you are or have worked with "
+        "This list contains all the students you are working with or have worked with "
         "(including those who have since completed their program).\n\n"
         "**Note:** The student list is ordered based on the most recent Revised Final Paper due date. "
         "In case you have been introduced to a student but cannot find them on this list, "
@@ -907,7 +907,7 @@ def show_confirmed_students(students):
         with col2:
             pm_name = student.get("program_manager_name") or "—"
             pm_email = student.get("program_manager_email") or "—"
-            st.caption(f"Program Manager: {pm_name} ({pm_email})")
+            st.caption(f"Program Manager: {pm_name} — {pm_email}")
         with col3:
             due = format_date(student.get("revised_final_paper_due", ""))
             st.caption(f"Revised Final Paper Due Date: {due}")
@@ -980,7 +980,7 @@ def show_student_background(student):
         st.markdown("**📧 Program Manager**")
         pm_name = student.get("program_manager_name") or "Not specified"
         pm_email = student.get("program_manager_email") or "Not specified"
-        st.markdown(f"{pm_name} ({pm_email})")
+        st.markdown(f"{pm_name} — {pm_email}")
 
     with col4:
         st.markdown("**📅 Student's Revised Final Paper Due Date**")
