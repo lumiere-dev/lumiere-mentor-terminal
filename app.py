@@ -106,6 +106,7 @@ STUDENT_FIELDS = {
     "foundation_student": "Foundation Student",
     "tuition_paid": "OB: Full Tuition Paid",
     "program_manager_email": "Program Manager Email",
+    "program_manager_name": "Program Manager Name",
     "revised_final_paper_due": "PM: Student's Revised Final Paper - Due date",
     "student_no_shows": "[Current + Archived] No. of Student No Shows in Mentor Meetings",
     "reason_for_interest": "Reason for Interest in Areas",
@@ -327,6 +328,7 @@ def get_students_for_mentor(mentor_name):
                 "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
                 "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
                 "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
+                "program_manager_name": unwrap(fields.get(STUDENT_FIELDS["program_manager_name"], "")),
                 "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
                 "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
                 "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
@@ -900,8 +902,9 @@ def show_confirmed_students(students):
                 st.session_state.selected_student_name = student["name"]
                 st.rerun()
         with col2:
+            pm_name = student.get("program_manager_name") or "—"
             pm_email = student.get("program_manager_email") or "—"
-            st.caption(f"Program Manager Email: {pm_email}")
+            st.caption(f"Program Manager: {pm_name} ({pm_email})")
         with col3:
             due = format_date(student.get("revised_final_paper_due", ""))
             st.caption(f"Revised Final Paper Due Date: {due}")
@@ -963,16 +966,18 @@ def show_student_background(student):
         st.markdown("**🔬 Research Area - First Preference**")
         st.markdown(student["research_area"] or "Not specified")
 
-        st.markdown("**💡 Reason for Interest in Areas**")
-        st.markdown(student.get("reason_for_interest") or "Not specified")
+        with st.expander("💡 Reason for Interest in Areas"):
+            st.markdown(student.get("reason_for_interest") or "Not specified")
 
     st.markdown("---")
 
     col3, col4 = st.columns(2)
 
     with col3:
-        st.markdown("**📧 Program Manager Email**")
-        st.markdown(student.get("program_manager_email") or "Not specified")
+        st.markdown("**📧 Program Manager**")
+        pm_name = student.get("program_manager_name") or "Not specified"
+        pm_email = student.get("program_manager_email") or "Not specified"
+        st.markdown(f"{pm_name} ({pm_email})")
 
     with col4:
         st.markdown("**📅 Student's Revised Final Paper Due Date**")
