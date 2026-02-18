@@ -684,12 +684,12 @@ def show_resources():
         },
         {
             "title": "Meeting Update Form",
-            "description": "Submit updates after each meeting with your student.",
+            "description": "Fill this out after each meeting",
             "url": "https://airtable.com/appK9HemdsQBzVefU/shrKPtNpRyPI9eLuu",
         },
         {
             "title": "Submission Portal",
-            "description": "Portal for student paper and project submissions.",
+            "description": "Where you submit the syllabus and final evaluation",
             "url": "https://airtable.com/appK9HemdsQBzVefU/shr9fSMhucWi2PSox",
         },
     ]
