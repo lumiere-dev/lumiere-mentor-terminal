@@ -803,7 +803,7 @@ def show_assigned_students(students):
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
-
+    st.markdown('<p class="sub-header">This list contains all the students you are working with or have worked with (including those who have since completed their program).</p>', unsafe_allow_html=True)
 
     # Filter to confirmed students only
     confirmed_students = [s for s in students if s["mentor_confirmation"] == "Yes"]
