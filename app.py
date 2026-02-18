@@ -1077,7 +1077,7 @@ def show_mentor_submissions(student):
     all_deadlines = get_deadlines_for_student(student["name"])
     syllabus_deadlines = [d for d in all_deadlines if d["type"] == "Syllabus"]
 
-    st.markdown("#### Syllabus")
+
     if not syllabus_deadlines:
         st.info("No syllabus deadline found for this student.")
     else:
@@ -1126,7 +1126,7 @@ def show_mentor_submissions(student):
     st.markdown("---")
 
     # Evaluation & Feedback from progress table
-    st.markdown("#### Evaluation & Feedback")
+
     eval_items = get_eval_feedback_for_student(student["name"])
 
     if not eval_items:
