@@ -867,6 +867,40 @@ def show_confirmed_students(students):
                 st.rerun()
 
             st.markdown(f"## {selected['name']}")
+
+            # Email Program Manager button
+            pm_email = selected.get("program_manager_email")
+            pm_name = selected.get("program_manager_name") or "Program Manager"
+            if pm_email and pm_email != "—":
+                with st.expander(f"📧 Email Program Manager ({pm_name})"):
+                    email_subject = st.text_input("Subject", key=f"email_subject_{selected['id']}")
+                    email_body = st.text_area("Message", height=150, key=f"email_body_{selected['id']}")
+                    if st.button("Send Email", key=f"send_email_{selected['id']}"):
+                        if not email_subject or not email_body:
+                            st.warning("Please fill in both the subject and message.")
+                        else:
+                            try:
+                                resend.api_key = st.secrets["RESEND_API_KEY"]
+                                resend.Emails.send({
+                                    "from": st.secrets.get("FROM_EMAIL", "Mentor Portal <onboarding@resend.dev>"),
+                                    "to": [pm_email],
+                                    "reply_to": st.session_state.mentor_email,
+                                    "subject": email_subject,
+                                    "html": f"""
+                                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                        <p>{email_body.replace(chr(10), '<br>')}</p>
+                                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                                        <p style="color: #64748B; font-size: 12px;">
+                                            Sent by {st.session_state.mentor_name} via Lumiere Mentor Portal
+                                            regarding student: {selected['name']}
+                                        </p>
+                                    </div>
+                                    """
+                                })
+                                st.success(f"Email sent to {pm_name}!")
+                            except Exception as e:
+                                st.error(f"Failed to send email: {e}")
+
             st.markdown("---")
 
             tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Mentor Submissions"])
