@@ -409,20 +409,22 @@ def get_eval_feedback_for_student(student_name):
         items = []
         for record in records:
             fields = record["fields"]
-            # Collect attachment fields
+            created_time = record.get("createdTime", "")
+
+            # Get attachment from "MFFF - Evaluation form" field
             attachments = []
-            for key, value in fields.items():
-                if isinstance(value, list) and value and isinstance(value[0], dict) and "url" in value[0]:
-                    for att in value:
-                        attachments.append({"filename": att.get("filename", "Download"), "url": att.get("url", "")})
+            eval_form = fields.get("MFFF - Evaluation form")
+            if isinstance(eval_form, list):
+                for att in eval_form:
+                    if isinstance(att, dict) and att.get("url"):
+                        attachments.append({"filename": att.get("filename", "Download"), "url": att["url"]})
 
             items.append({
-                "status": fields.get("Status", ""),
-                "date_submitted": fields.get("Date Submitted", fields.get("Date of meeting", "")),
+                "created_time": created_time,
                 "attachments": attachments,
             })
 
-        items.sort(key=lambda x: x["date_submitted"] or "0000-00-00", reverse=True)
+        items.sort(key=lambda x: x["created_time"] or "0000-00-00", reverse=True)
         return items
     except Exception as e:
         st.error(f"Error fetching evaluations: {e}")
@@ -1128,24 +1130,23 @@ def show_mentor_submissions(student):
     eval_items = get_eval_feedback_for_student(student["name"])
 
     if not eval_items:
-        st.info("No evaluation or feedback records found for this student.")
+        with st.container():
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.markdown("📋 **Evaluation & Feedback**")
+            with col2:
+                st.warning("Not Submitted")
     else:
         for item in eval_items:
-            status = item["status"] or "Unknown"
-            if status == "Submitted":
-                icon = "✅"
-            else:
-                icon = "📋"
-
             with st.container():
                 col1, col2 = st.columns([2, 1])
                 with col1:
-                    st.markdown(f"{icon} **Evaluation & Feedback**")
+                    st.markdown("✅ **Evaluation & Feedback**")
                 with col2:
-                    if item["date_submitted"]:
-                        st.success(f"Submitted {format_date(item['date_submitted'])}")
+                    if item["created_time"]:
+                        st.success(f"Submitted {format_datetime_ist(item['created_time'])}")
                     else:
-                        st.warning(status)
+                        st.success("Submitted")
 
                 if item["attachments"]:
                     for att in item["attachments"]:
