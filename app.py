@@ -106,7 +106,7 @@ STUDENT_FIELDS = {
     "foundation_student": "Foundation Student",
     "tuition_paid": "OB: Full Tuition Paid",
     "program_manager_email": "Program Manager Email",
-    "program_manager_name": "Program Manager Name",
+    "program_manager_name": "Program Manager (Text)",
     "revised_final_paper_due": "PM: Student's Revised Final Paper - Due date",
     "student_no_shows": "[Current + Archived] No. of Student No Shows in Mentor Meetings",
     "reason_for_interest": "Reason for Interest in Areas",
