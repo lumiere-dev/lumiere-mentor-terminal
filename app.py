@@ -636,7 +636,7 @@ def show_dashboard():
 
         view = st.radio(
             "Select View",
-            ["📋 Assigned Students", "✅ Confirmed Students"],
+            ["📋 Assigned Students", "✅ Confirmed Students", "📚 Resources"],
             label_visibility="collapsed"
         )
 
@@ -666,8 +666,46 @@ def show_dashboard():
 
     if view == "📋 Assigned Students":
         show_assigned_students(students)
-    else:
+    elif view == "✅ Confirmed Students":
         show_confirmed_students(students)
+    else:
+        show_resources()
+
+# RESOURCES PAGE
+def show_resources():
+    st.markdown('<p class="main-header">Resources</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Helpful links and tools for mentors</p>', unsafe_allow_html=True)
+
+    resources = [
+        {
+            "title": "Mentor Guidebook",
+            "description": "Comprehensive guide covering mentorship best practices, expectations, and procedures.",
+            "url": "https://misty-music-eb4.notion.site/Lumiere-Mentor-Guidebook-2fd9c2704a104f86b97564620aca6874",
+        },
+        {
+            "title": "Meeting Update Form",
+            "description": "Submit updates after each meeting with your student.",
+            "url": "https://airtable.com/appK9HemdsQBzVefU/shrKPtNpRyPI9eLuu",
+        },
+        {
+            "title": "Submission Portal",
+            "description": "Portal for student paper and project submissions.",
+            "url": "https://airtable.com/appK9HemdsQBzVefU/shr9fSMhucWi2PSox",
+        },
+    ]
+
+    for resource in resources:
+        with st.container():
+            st.markdown(
+                f'<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); '
+                f'border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">'
+                f'<h3 style="margin: 0 0 0.5rem 0;">{resource["title"]}</h3>'
+                f'<p style="margin: 0 0 0.75rem 0; opacity: 0.8;">{resource["description"]}</p>'
+                f'<a href="{resource["url"]}" target="_blank" style="color: #DC1E35; text-decoration: none; '
+                f'font-weight: 600;">Open &rarr;</a>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
