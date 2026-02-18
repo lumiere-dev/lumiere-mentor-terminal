@@ -692,6 +692,16 @@ def show_resources():
             "description": "Where you submit the syllabus and final evaluation",
             "url": "https://airtable.com/appK9HemdsQBzVefU/shr9fSMhucWi2PSox",
         },
+        {
+            "title": "Student Submission Portal for Individual & Premium Research Program",
+            "description": "Where students submit their work",
+            "url": "https://airtable.com/appK9HemdsQBzVefU/shrecxdBL3WJppYsX",
+        },
+        {
+            "title": "Student Submission Portal for Research Fellowship",
+            "description": "Where students submit their work",
+            "url": "https://airtable.com/appK9HemdsQBzVefU/shrtKvhk7wkPxuMMz",
+        },
     ]
 
     for resource in resources:
@@ -706,6 +716,36 @@ def show_resources():
                 f'</div>',
                 unsafe_allow_html=True,
             )
+
+    # Syllabus Templates section
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); '
+        'border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">'
+        '<h3 style="margin: 0 0 0.5rem 0;">Syllabus Templates</h3>'
+        '<p style="margin: 0 0 0.75rem 0; opacity: 0.8;">Base your syllabus on these documents</p>'
+        '<ul style="list-style: none; padding: 0; margin: 0;">'
+        '<li style="margin-bottom: 0.5rem;"><a href="https://docs.google.com/document/d/10dxpWF1-LiJz77to7gC7HEf90me1MxuQGYek5n6UKqs/edit" '
+        'target="_blank" style="color: #DC1E35; text-decoration: none; font-weight: 600;">'
+        'Syllabus Outline for Individual &amp; Premium Research Program &rarr;</a></li>'
+        '<li style="margin-bottom: 0.5rem;"><a href="https://docs.google.com/spreadsheets/d/1KE9xVF78F6g0J1LcpyzPLt5vp1he7NRBFUEBc_AucaI/edit#gid=0" '
+        'target="_blank" style="color: #DC1E35; text-decoration: none; font-weight: 600;">'
+        'Syllabus Outline for Research Fellowship &rarr;</a></li>'
+        '</ul></div>',
+        unsafe_allow_html=True,
+    )
+
+    # Non Branded Syllabus Template section
+    st.markdown(
+        '<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); '
+        'border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">'
+        '<h3 style="margin: 0 0 0.5rem 0;">Non Branded Syllabus Template for Partner Programs</h3>'
+        '<ul style="list-style: none; padding: 0; margin: 0;">'
+        '<li><a href="https://docs.google.com/document/d/1ZOsMZiBEGlKgvP8tfU1wVtKR3AVhE48K/edit?usp=sharing&ouid=115965191483790562336&rtpof=true&sd=true" '
+        'target="_blank" style="color: #DC1E35; text-decoration: none; font-weight: 600;">'
+        'Syllabus Outline for Individual and Premium Research Program &rarr;</a></li>'
+        '</ul></div>',
+        unsafe_allow_html=True,
+    )
 
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
