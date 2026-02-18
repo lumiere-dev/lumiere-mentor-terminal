@@ -398,6 +398,36 @@ def get_meeting_notes_for_student(student_name):
         st.error(f"Error fetching meeting notes: {e}")
         return []
 
+def get_eval_feedback_for_student(student_name):
+    """Get Evaluation & Feedback records from the progress table for a student"""
+    tables = get_tables()
+    try:
+        name_part = student_name.split('|')[0].strip()
+        formula = f"AND(FIND('{name_part}', {{Mentor Student Meeting Key}}), {{Type of Record}} = 'Evaluation & Feedback')"
+        records = tables["progress"].all(formula=formula)
+
+        items = []
+        for record in records:
+            fields = record["fields"]
+            # Collect attachment fields
+            attachments = []
+            for key, value in fields.items():
+                if isinstance(value, list) and value and isinstance(value[0], dict) and "url" in value[0]:
+                    for att in value:
+                        attachments.append({"filename": att.get("filename", "Download"), "url": att.get("url", "")})
+
+            items.append({
+                "status": fields.get("Status", ""),
+                "date_submitted": fields.get("Date Submitted", fields.get("Date of meeting", "")),
+                "attachments": attachments,
+            })
+
+        items.sort(key=lambda x: x["date_submitted"] or "0000-00-00", reverse=True)
+        return items
+    except Exception as e:
+        st.error(f"Error fetching evaluations: {e}")
+        return []
+
 def format_duration(value):
     """Format a duration value (seconds from Airtable API) as h:mm"""
     if not value and value != 0:
@@ -832,13 +862,15 @@ def show_confirmed_students(students):
             st.markdown(f"## {selected['name']}")
             st.markdown("---")
 
-            tab1, tab2, tab3 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Deadlines & Submissions"])
+            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Mentor Submissions"])
             with tab1:
                 show_student_background(selected)
             with tab2:
                 show_mentor_meeting_summary(selected)
             with tab3:
                 show_student_deadlines_and_submissions(selected)
+            with tab4:
+                show_mentor_submissions(selected)
             return
 
     # Helper text
@@ -957,9 +989,11 @@ def show_student_background(student):
     st.markdown(student.get("interview_notes") or "Not specified")
 
 def show_student_deadlines_and_submissions(student):
-    st.markdown("### Deadlines & Submissions")
+    st.markdown("### Student Deadlines & Submissions")
 
-    deadlines = get_deadlines_for_student(student["name"])
+    all_deadlines = get_deadlines_for_student(student["name"])
+    # Filter out Syllabus — those are shown in Mentor Submissions
+    deadlines = [d for d in all_deadlines if d["type"] != "Syllabus"]
 
     if not deadlines:
         st.info("No deadlines found for this student.")
@@ -1031,6 +1065,92 @@ def show_student_deadlines_and_submissions(student):
                         st.markdown(f"  📎 [View Submission]({value})")
                     else:
                         st.markdown(f"  📄 {value}")
+
+            st.markdown("---")
+
+def show_mentor_submissions(student):
+    st.markdown("### Mentor Submissions")
+
+    # Syllabus from deadlines table
+    all_deadlines = get_deadlines_for_student(student["name"])
+    syllabus_deadlines = [d for d in all_deadlines if d["type"] == "Syllabus"]
+
+    st.markdown("#### Syllabus")
+    if not syllabus_deadlines:
+        st.info("No syllabus deadline found for this student.")
+    else:
+        for deadline in syllabus_deadlines:
+            status = deadline["status"]
+            due_date = deadline["due_date"]
+            overdue = is_overdue(due_date, status)
+
+            if status == "Submitted":
+                icon = "✅"
+            elif overdue:
+                icon = "⚠️"
+            else:
+                icon = "📅"
+
+            with st.container():
+                col1, col2, col3 = st.columns([2, 1, 1])
+                with col1:
+                    st.markdown(f"{icon} **Syllabus**")
+                with col2:
+                    st.markdown(f"**Due:** {format_date(due_date)}")
+                with col3:
+                    if status == "Submitted":
+                        st.success(f"Submitted {format_datetime_ist(deadline['date_submitted'])}")
+                    elif overdue:
+                        st.error("Overdue")
+                    else:
+                        st.warning("Not Submitted")
+
+                if deadline.get("submissions"):
+                    for field_name, value in deadline["submissions"].items():
+                        if isinstance(value, list):
+                            for attachment in value:
+                                if isinstance(attachment, dict):
+                                    url = attachment.get("url", "")
+                                    filename = attachment.get("filename", "Download")
+                                    if url:
+                                        st.markdown(f"  📎 [{filename}]({url})")
+                                else:
+                                    st.markdown(f"  📎 {attachment}")
+                        elif isinstance(value, str) and value.startswith("http"):
+                            st.markdown(f"  📎 [View Submission]({value})")
+                        else:
+                            st.markdown(f"  📄 {value}")
+
+    st.markdown("---")
+
+    # Evaluation & Feedback from progress table
+    st.markdown("#### Evaluation & Feedback")
+    eval_items = get_eval_feedback_for_student(student["name"])
+
+    if not eval_items:
+        st.info("No evaluation or feedback records found for this student.")
+    else:
+        for item in eval_items:
+            status = item["status"] or "Unknown"
+            if status == "Submitted":
+                icon = "✅"
+            else:
+                icon = "📋"
+
+            with st.container():
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    st.markdown(f"{icon} **Evaluation & Feedback**")
+                with col2:
+                    if item["date_submitted"]:
+                        st.success(f"Submitted {format_date(item['date_submitted'])}")
+                    else:
+                        st.warning(status)
+
+                if item["attachments"]:
+                    for att in item["attachments"]:
+                        if att["url"]:
+                            st.markdown(f"  📎 [{att['filename']}]({att['url']})")
 
             st.markdown("---")
 
