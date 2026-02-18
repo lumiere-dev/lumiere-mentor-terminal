@@ -310,8 +310,11 @@ def get_students_for_mentor(mentor_name):
             # Helper to unwrap Airtable lookup fields (returned as arrays)
             def unwrap(val, default=""):
                 if isinstance(val, list):
-                    return val[0] if val else default
-                return val if val is not None else default
+                    val = val[0] if val else default
+                val = val if val is not None else default
+                if isinstance(val, str):
+                    val = val.strip("[]'\"")
+                return val
 
             students.append({
                 "id": record["id"],
