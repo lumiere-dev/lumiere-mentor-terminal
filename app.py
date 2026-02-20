@@ -639,7 +639,7 @@ def show_login_page():
     </style>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1.5, 1, 1.5])
+    col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
         # Logo + header inside the card
