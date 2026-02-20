@@ -638,7 +638,11 @@ def show_login_page():
             unsafe_allow_html=True
         )
         st.markdown(
-            '<p style="text-align:center; color:#64748B; font-size:0.9rem; margin-bottom:1.25rem;">Access your student dashboard</p>',
+            '<p style="text-align:center; color:#64748B; font-size:0.9rem; margin-bottom:0.75rem;">Access your student dashboard</p>',
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            '<p style="text-align:center; color:#94A3B8; font-size:0.82rem; margin-bottom:1.5rem; line-height:1.5;">Track your matched students, stay on top of their deadlines and submissions, and get a clear view of everything happening across your program.</p>',
             unsafe_allow_html=True
         )
 
@@ -653,6 +657,10 @@ def show_login_page():
             # Email label + form
             st.markdown(
                 '<p style="font-size:0.75rem; font-weight:600; letter-spacing:0.08em; color:#64748B; margin-bottom:0.25rem; text-transform:uppercase;">EMAIL ADDRESS</p>',
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                '<p style="font-size:0.8rem; color:#94A3B8; margin-bottom:0.5rem;">Enter the email address that you\'ve shared with our team.</p>',
                 unsafe_allow_html=True
             )
             with st.form("login_form"):
@@ -689,6 +697,10 @@ def show_login_page():
                         st.error("Mentor email not found.")
         else:
             with st.expander("Team Access"):
+                st.markdown(
+                    '<p style="font-size:0.8rem; color:#64748B; margin-bottom:0.75rem;">For Lumiere team members only. Enter your admin key to preview the portal as any mentor.</p>',
+                    unsafe_allow_html=True
+                )
                 with st.form("team_unlock_form"):
                     admin_key = st.text_input("Admin Key", type="password", placeholder="Enter admin key")
                     unlock_submitted = st.form_submit_button("Unlock", use_container_width=True)
