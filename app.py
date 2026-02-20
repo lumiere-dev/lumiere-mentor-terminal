@@ -571,56 +571,67 @@ def show_login_page():
             padding-top: 10vh !important;
             max-width: 100% !important;
         }
-        /* White card on the middle column */
+        /* White card on the middle column
+           Covers both old ("column") and new ("stColumn") Streamlit testid values */
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2),
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) {
-            background: white;
-            border-radius: 16px;
+            background: white !important;
+            border-radius: 16px !important;
             padding: 2.5rem !important;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4) !important;
         }
         /* Text colours inside card */
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) p,
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) label,
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) span,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) p,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) label,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) span {
             color: #1A1A2E !important;
         }
         /* Input field */
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) input,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) input {
             border: 1px solid #CBD5E1 !important;
             border-radius: 8px !important;
             color: #1A1A2E !important;
             background: white !important;
         }
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) input::placeholder,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) input::placeholder {
             color: #94A3B8 !important;
         }
-        /* Buttons */
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) [data-testid="stFormSubmitButton"] > button,
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) .stButton > button {
+        /* Buttons — broad fallback covers both variants */
+        [data-testid="stFormSubmitButton"] > button,
+        .stButton > button {
             background-color: #DC1E35 !important;
             color: white !important;
             border: none !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
         }
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) [data-testid="stFormSubmitButton"] > button:hover,
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) .stButton > button:hover {
+        [data-testid="stFormSubmitButton"] > button:hover,
+        .stButton > button:hover {
             background-color: #B01829 !important;
         }
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) [data-testid="stFormSubmitButton"] > button p,
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) .stButton > button p {
+        [data-testid="stFormSubmitButton"] > button p,
+        .stButton > button p {
             color: white !important;
         }
         /* Divider inside card */
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) hr,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) hr {
             border-color: #E2E8F0 !important;
         }
-        /* Expander inside card */
+        /* Expander (Team Access) inside card */
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) details,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details {
             background: #F8FAFC !important;
-            border: 1px solid #E2E8F0 !important;
+            border: 1px solid #CBD5E1 !important;
             border-radius: 8px !important;
         }
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) details summary,
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) details summary *,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details summary,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details summary * {
             color: #1A1A2E !important;
