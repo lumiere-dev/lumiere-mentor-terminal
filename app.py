@@ -564,54 +564,83 @@ def show_login_page():
         .stApp {
             background-color: #1A1A2E;
         }
-        .main-header {
-            color: #FFFFFF !important;
+        /* Hide Streamlit chrome */
+        #MainMenu, header, footer { visibility: hidden; }
+        /* Push card down for vertical centering */
+        .block-container {
+            padding-top: 10vh !important;
+            max-width: 100% !important;
         }
-        .sub-header {
-            color: #CBD5E1 !important;
+        /* White card on the middle column */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
         }
-        .stApp h3, .stApp p, .stApp label, .stApp span {
-            color: #FFFFFF !important;
+        /* Text colours inside card */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) p,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) label,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) span {
+            color: #1A1A2E !important;
         }
-        .stApp input {
-            color: #000000 !important;
-            background-color: #FFFFFF !important;
+        /* Input field */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) input {
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 8px !important;
+            color: #1A1A2E !important;
+            background: white !important;
         }
-        .stApp input::placeholder {
-            color: #999999 !important;
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) input::placeholder {
+            color: #94A3B8 !important;
         }
-        .stApp .stButton > button,
-        .stApp [data-testid="stFormSubmitButton"] > button {
+        /* Buttons */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) [data-testid="stFormSubmitButton"] > button,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) .stButton > button {
             background-color: #DC1E35 !important;
-            color: #FFFFFF !important;
+            color: white !important;
             border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
         }
-        .stApp .stButton > button:hover,
-        .stApp [data-testid="stFormSubmitButton"] > button:hover {
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) [data-testid="stFormSubmitButton"] > button:hover,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) .stButton > button:hover {
             background-color: #B01829 !important;
         }
-        .stApp .stButton > button p,
-        .stApp [data-testid="stFormSubmitButton"] > button p {
-            color: #FFFFFF !important;
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) [data-testid="stFormSubmitButton"] > button p,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) .stButton > button p {
+            color: white !important;
         }
-        .stApp details {
-            background-color: rgba(255,255,255,0.05) !important;
-            border: 1px solid rgba(255,255,255,0.2) !important;
+        /* Divider inside card */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) hr {
+            border-color: #E2E8F0 !important;
         }
-        .stApp details summary, .stApp details summary * {
-            color: #FFFFFF !important;
+        /* Expander inside card */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details {
+            background: #F8FAFC !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 8px !important;
+        }
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details summary,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details summary * {
+            color: #1A1A2E !important;
         }
     </style>
     """, unsafe_allow_html=True)
-    st.image("assets/lumiere_logo.png", width=300)
-    st.markdown('<p class="main-header">Lumiere Mentor Portal</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Access your student dashboard</p>', unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([1.5, 1, 1.5])
 
     with col2:
-        st.markdown("### Email Address")
-        st.markdown("Sign in with your registered email.")
+        # Logo + header inside the card
+        st.image("assets/lumiere_logo.png", use_container_width=True)
+        st.markdown(
+            '<h2 style="text-align:center; color:#1A1A2E; font-size:1.5rem; font-weight:700; margin:0.5rem 0 0.25rem;">Lumiere Mentor Portal</h2>',
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            '<p style="text-align:center; color:#64748B; font-size:0.9rem; margin-bottom:1.25rem;">Access your student dashboard</p>',
+            unsafe_allow_html=True
+        )
 
         # Check if magic link was just sent
         if st.session_state.magic_link_sent:
@@ -621,9 +650,13 @@ def show_login_page():
                 st.session_state.magic_link_sent = False
                 st.rerun()
         else:
-            # Regular mentor login with magic link
+            # Email label + form
+            st.markdown(
+                '<p style="font-size:0.75rem; font-weight:600; letter-spacing:0.08em; color:#64748B; margin-bottom:0.25rem; text-transform:uppercase;">EMAIL ADDRESS</p>',
+                unsafe_allow_html=True
+            )
             with st.form("login_form"):
-                email = st.text_input("Email Address", label_visibility="collapsed")
+                email = st.text_input("Email Address", label_visibility="collapsed", placeholder="your.email@example.com")
                 submitted = st.form_submit_button("Send Magic Link", use_container_width=True)
 
                 if submitted and email:
