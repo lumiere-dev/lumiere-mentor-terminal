@@ -645,11 +645,7 @@ def show_login_page():
         # Logo + header inside the card
         st.image("assets/lumiere_logo.png", use_container_width=True)
         st.markdown(
-            '<h2 style="text-align:center; color:#1A1A2E; font-size:1.5rem; font-weight:700; margin:0.5rem 0 0.25rem;">Lumiere Mentor Portal</h2>',
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            '<p style="text-align:center; color:#64748B; font-size:0.9rem; margin-bottom:0.75rem;">Access your student dashboard</p>',
+            '<h2 style="text-align:center; color:#1A1A2E; font-size:1.5rem; font-weight:700; margin:0.5rem 0 0.25rem;">Mentor Portal</h2>',
             unsafe_allow_html=True
         )
         st.markdown(
