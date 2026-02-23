@@ -973,7 +973,7 @@ def show_confirmed_students(students):
             st.markdown(
                 f"""
                 <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
-                            margin-bottom:0.75rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                            margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
                             border-left:4px solid #BE1E2D;">
                     <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
                         {student["name"]}
