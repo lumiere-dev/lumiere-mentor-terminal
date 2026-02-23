@@ -112,7 +112,9 @@ STUDENT_FIELDS = {
     "reason_for_interest": "Reason for Interest in Areas",
     "white_label": "White Label or Partner Program",
     "previous_coursework": "Previous Coursework",
-    "interview_notes": "Interview Notes For The Mentor"
+    "interview_notes": "Interview Notes For The Mentor",
+    "preferred_name": "Preferred Name",
+    "student_status": "Student Status in Program"
 }
 
 DEADLINE_FIELDS = {
@@ -340,7 +342,9 @@ def get_students_for_mentor(mentor_name):
                 "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
                 "white_label": unwrap(fields.get(STUDENT_FIELDS["white_label"], "")),
                 "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
-                "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], ""))
+                "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
+                "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
+                "student_status": fields.get(STUDENT_FIELDS["student_status"], "")
             })
         return students
     except Exception as e:
@@ -1083,9 +1087,15 @@ def show_student_background(student):
         st.markdown("**🎓 Graduation Year**")
         st.markdown(str(student["graduation_year"]) if student["graduation_year"] else "Not specified")
 
+        st.markdown("**🏷️ Preferred Name**")
+        st.markdown(student.get("preferred_name") or "Not specified")
+
     with col2:
         st.markdown("**🔬 Research Area - First Preference**")
         st.markdown(student["research_area"] or "Not specified")
+
+        st.markdown("**📌 Student Status in Program**")
+        st.markdown(student.get("student_status") or "Not specified")
 
         with st.expander("💡 Reason for Interest in Areas"):
             st.markdown(student.get("reason_for_interest") or "Not specified")
@@ -1109,11 +1119,11 @@ def show_student_background(student):
     st.markdown(student.get("white_label") or "No")
 
     st.markdown("---")
-    st.markdown("**📚 Previous Coursework**")
+    st.markdown("**📚 Student has completed coursework in:**")
     st.markdown(student.get("previous_coursework") or "Not specified")
 
     st.markdown("---")
-    st.markdown("**🗒️ Interview Notes For The Mentor**")
+    st.markdown("**🗒️ Notes from our team for the mentor**")
     st.markdown(student.get("interview_notes") or "Not specified")
 
 def show_student_deadlines_and_submissions(student):
