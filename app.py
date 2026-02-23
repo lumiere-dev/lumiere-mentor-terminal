@@ -623,12 +623,6 @@ def show_login_page():
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) hr {
             border-color: #E2E8F0 !important;
         }
-        /* Centre the logo image */
-        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) img,
-        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) img {
-            display: block !important;
-            margin: 0 auto !important;
-        }
         /* Expander (Team Access) inside card */
         [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) details,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details {
@@ -649,7 +643,15 @@ def show_login_page():
 
     with col2:
         # Logo + header inside the card
-        st.image("assets/lumiere_logo.png", width=220)
+        import base64
+        with open("assets/lumiere_logo.png", "rb") as f:
+            logo_b64 = base64.b64encode(f.read()).decode()
+        st.markdown(
+            f'<div style="text-align:center; margin-bottom:0.5rem;">'
+            f'<img src="data:image/png;base64,{logo_b64}" width="220">'
+            f'</div>',
+            unsafe_allow_html=True
+        )
         st.markdown(
             '<h2 style="text-align:center; color:#1A1A2E; font-size:1.5rem; font-weight:700; margin:0.5rem 0 0.25rem;">Mentor Portal</h2>',
             unsafe_allow_html=True
