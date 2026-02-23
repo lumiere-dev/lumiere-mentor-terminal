@@ -742,7 +742,7 @@ def show_dashboard():
 
         view = st.radio(
             "Select View",
-            ["📋 Prospective Students", "✅ Confirmed Students", "📚 Resources"],
+            ["✅ Confirmed Students", "📋 Prospective Students", "📚 Resources"],
             label_visibility="collapsed"
         )
 
