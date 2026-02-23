@@ -912,11 +912,21 @@ def show_confirmed_students(students):
         st.info("No confirmed students yet. Students will appear here once they confirm the mentor match.")
         return
 
-    # Sort by most recent revised final paper due date (most recent first, empty dates last)
-    confirmed_students.sort(
-        key=lambda s: s.get("revised_final_paper_due") or "0000-00-00",
-        reverse=True
-    )
+    # Sort: upcoming due dates soonest first, overdue/empty dates at the bottom
+    today = datetime.now().date()
+    def due_date_sort_key(s):
+        raw = s.get("revised_final_paper_due")
+        if not raw:
+            return (2, "9999-99-99")  # no date → bottom
+        try:
+            d = datetime.strptime(raw, "%Y-%m-%d").date()
+            if d >= today:
+                return (0, raw)   # upcoming → top, sorted ascending
+            else:
+                return (1, raw)   # overdue → middle-bottom, sorted ascending
+        except:
+            return (2, "9999-99-99")
+    confirmed_students.sort(key=due_date_sort_key)
 
     # If a student is selected, show their profile
     if "selected_student_name" in st.session_state and st.session_state.selected_student_name:
