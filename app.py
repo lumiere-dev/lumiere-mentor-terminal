@@ -116,7 +116,9 @@ STUDENT_FIELDS = {
     "preferred_name": "Preferred Name",
     "student_status": "PM: Student Status in Program",
     "current_grade": "Current Grade in School",
-    "country": "Country of Residence (single select)"
+    "country": "Country of Residence (single select)",
+    "writing_coach_name": "Writing Coach Name (Text)",
+    "writing_coach_email": "Writing Coach Email"
 }
 
 DEADLINE_FIELDS = {
@@ -348,7 +350,9 @@ def get_students_for_mentor(mentor_name):
                 "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
                 "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
                 "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
-                "country": unwrap(fields.get(STUDENT_FIELDS["country"], ""))
+                "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
+                "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
+                "writing_coach_email": fields.get(STUDENT_FIELDS["writing_coach_email"], "")
             })
         return students
     except Exception as e:
@@ -1117,6 +1121,8 @@ def show_student_background(student):
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">'
         + fb("Program Manager", pm_name)
         + fb("PM Email", pm_email)
+        + fb("Writing Coach", student.get("writing_coach_name"))
+        + fb("Writing Coach Email", student.get("writing_coach_email"))
         + fb("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))
         + fb("Partner / White Label Program", student.get("white_label") or "No")
         + '</div></div>',
