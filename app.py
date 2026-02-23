@@ -742,7 +742,7 @@ def show_dashboard():
 
         view = st.radio(
             "Select View",
-            ["📋 Assigned Students", "✅ Confirmed Students", "📚 Resources"],
+            ["📋 Prospective Students", "✅ Confirmed Students", "📚 Resources"],
             label_visibility="collapsed"
         )
 
@@ -770,7 +770,7 @@ def show_dashboard():
     # Get students
     students = get_students_for_mentor(st.session_state.mentor_name)
 
-    if view == "📋 Assigned Students":
+    if view == "📋 Prospective Students":
         show_assigned_students(students)
     elif view == "✅ Confirmed Students":
         show_confirmed_students(students)
@@ -855,7 +855,7 @@ def show_resources():
 
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
-    st.markdown('<p class="main-header">Assigned Students</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Prospective Students</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Track onboarding progress for your assigned students</p>', unsafe_allow_html=True)
 
     st.info(
@@ -868,7 +868,7 @@ def show_assigned_students(students):
         st.info("No students assigned to you yet.")
         return
 
-    st.markdown(f"**Your Assigned Students** — {len(students)} student{'s' if len(students) != 1 else ''}")
+    st.markdown(f"**Your Prospective Students** — {len(students)} student{'s' if len(students) != 1 else ''}")
 
     # Student filter
     student_names = ["All Students"] + [s["name"] for s in students]
