@@ -1130,7 +1130,7 @@ def show_student_background(student):
     st.markdown(student.get("previous_coursework") or "Not specified")
 
     st.markdown("---")
-    st.markdown("**🗒️ Notes from our team for the mentor**")
+    st.markdown("**🗒️ Notes from our team for this student**")
     st.markdown(student.get("interview_notes") or "Not specified")
 
 def show_student_deadlines_and_submissions(student):
