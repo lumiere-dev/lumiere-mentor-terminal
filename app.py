@@ -356,7 +356,7 @@ def get_students_for_mentor(mentor_name):
                 "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
                 "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
                 "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
-                "publication_specialist_email": fields.get(STUDENT_FIELDS["publication_specialist_email"], "")
+                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], ""))
             })
         return students
     except Exception as e:
@@ -996,7 +996,7 @@ def show_confirmed_students(students):
             else:
                 st.markdown("---")
 
-            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Mentor Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Mentor Submissions"])
+            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Your Meeting Notes with the Student", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
             with tab1:
                 show_student_background(selected)
             with tab2:
