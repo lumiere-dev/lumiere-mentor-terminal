@@ -352,7 +352,7 @@ def get_students_for_mentor(mentor_name):
                 "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
                 "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
                 "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
-                "writing_coach_email": fields.get(STUDENT_FIELDS["writing_coach_email"], "")
+                "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], ""))
             })
         return students
     except Exception as e:
@@ -1120,7 +1120,7 @@ def show_student_background(student):
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">'
         + fb("Program Manager", pm_name)
-        + fb("PM Email", pm_email)
+        + fb("Program Manager Email", pm_email)
         + fb("Writing Coach", student.get("writing_coach_name"))
         + fb("Writing Coach Email", student.get("writing_coach_email"))
         + fb("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))
