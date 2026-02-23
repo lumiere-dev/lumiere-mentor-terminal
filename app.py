@@ -796,77 +796,69 @@ def show_dashboard():
 # RESOURCES PAGE
 def show_resources():
     st.markdown('<p class="main-header">Resources</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Helpful links and tools for mentors</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Everything you need to run a great research program with your students.</p>', unsafe_allow_html=True)
 
-    resources = [
-        {
-            "title": "Mentor Guidebook",
-            "description": "Comprehensive guide covering mentorship best practices, expectations, and procedures.",
-            "url": "https://misty-music-eb4.notion.site/Lumiere-Mentor-Guidebook-2fd9c2704a104f86b97564620aca6874",
-        },
-        {
-            "title": "Meeting Update Form",
-            "description": "Fill this out after each meeting",
-            "url": "https://airtable.com/appK9HemdsQBzVefU/shrKPtNpRyPI9eLuu",
-        },
-        {
-            "title": "Submission Portal",
-            "description": "Where you submit the syllabus and final evaluation",
-            "url": "https://airtable.com/appK9HemdsQBzVefU/shr9fSMhucWi2PSox",
-        },
-        {
-            "title": "Student Submission Portal for Individual & Premium Research Program",
-            "description": "Where students submit their work",
-            "url": "https://airtable.com/appK9HemdsQBzVefU/shrecxdBL3WJppYsX",
-        },
-        {
-            "title": "Student Submission Portal for Research Fellowship",
-            "description": "Where students submit their work",
-            "url": "https://airtable.com/appK9HemdsQBzVefU/shrtKvhk7wkPxuMMz",
-        },
-    ]
+    def resource_card(title, description, url, label="Open →"):
+        return (
+            f'<a href="{url}" target="_blank" style="text-decoration:none;">'
+            f'<div style="background:#FFFFFF;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;'
+            f'box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #BE1E2D;'
+            f'transition:box-shadow 0.2s;cursor:pointer;">'
+            f'<div style="font-size:1rem;font-weight:700;color:#1A1A2E;margin-bottom:0.3rem;">{title}</div>'
+            f'<div style="font-size:0.88rem;color:#64748B;margin-bottom:0.75rem;line-height:1.5;">{description}</div>'
+            f'<div style="font-size:0.85rem;font-weight:600;color:#BE1E2D;">{label}</div>'
+            f'</div></a>'
+        )
 
-    for resource in resources:
-        with st.container():
-            st.markdown(
-                f'<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); '
-                f'border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">'
-                f'<h3 style="margin: 0 0 0.5rem 0;">{resource["title"]}</h3>'
-                f'<p style="margin: 0 0 0.75rem 0; opacity: 0.8;">{resource["description"]}</p>'
-                f'<a href="{resource["url"]}" target="_blank" style="color: #DC1E35; text-decoration: none; '
-                f'font-weight: 600;">Open &rarr;</a>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+    def link_item(title, url):
+        return (
+            f'<div style="padding:0.6rem 0;border-bottom:1px solid #F1F5F9;">'
+            f'<a href="{url}" target="_blank" style="font-size:0.9rem;font-weight:600;color:#BE1E2D;text-decoration:none;">'
+            f'{title} →</a></div>'
+        )
 
-    # Syllabus Templates section
+    # Section 1: Key Actions
+    st.markdown("#### Key Actions")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(
+            resource_card(
+                "Mentor Guidebook",
+                "Your go-to guide covering mentorship best practices, expectations, and program procedures.",
+                "https://misty-music-eb4.notion.site/Lumiere-Mentor-Guidebook-2fd9c2704a104f86b97564620aca6874"
+            ),
+            unsafe_allow_html=True
+        )
+    with col2:
+        st.markdown(
+            resource_card(
+                "Meeting Update Form",
+                "Fill this out after every meeting with your student to log progress and notes.",
+                "https://airtable.com/appK9HemdsQBzVefU/shrKPtNpRyPI9eLuu"
+            ),
+            unsafe_allow_html=True
+        )
+
     st.markdown(
-        '<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); '
-        'border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">'
-        '<h3 style="margin: 0 0 0.5rem 0;">Syllabus Templates</h3>'
-        '<p style="margin: 0 0 0.75rem 0; opacity: 0.8;">Base your syllabus on these documents</p>'
-        '<ul style="list-style: none; padding: 0; margin: 0;">'
-        '<li style="margin-bottom: 0.5rem;"><a href="https://docs.google.com/document/d/10dxpWF1-LiJz77to7gC7HEf90me1MxuQGYek5n6UKqs/edit" '
-        'target="_blank" style="color: #DC1E35; text-decoration: none; font-weight: 600;">'
-        'Syllabus Outline for Individual &amp; Premium Research Program &rarr;</a></li>'
-        '<li style="margin-bottom: 0.5rem;"><a href="https://docs.google.com/spreadsheets/d/1KE9xVF78F6g0J1LcpyzPLt5vp1he7NRBFUEBc_AucaI/edit#gid=0" '
-        'target="_blank" style="color: #DC1E35; text-decoration: none; font-weight: 600;">'
-        'Syllabus Outline for Research Fellowship &rarr;</a></li>'
-        '</ul></div>',
-        unsafe_allow_html=True,
+        resource_card(
+            "Mentor Submission Portal",
+            "Submit your syllabus and final evaluation for your students here.",
+            "https://airtable.com/appK9HemdsQBzVefU/shr9fSMhucWi2PSox"
+        ),
+        unsafe_allow_html=True
     )
 
-    # Non Branded Syllabus Template section
+    # Section 2: Syllabus Templates
+    st.markdown("#### Syllabus Templates")
     st.markdown(
-        '<div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); '
-        'border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem;">'
-        '<h3 style="margin: 0 0 0.5rem 0;">Non Branded Syllabus Template for Partner Programs</h3>'
-        '<ul style="list-style: none; padding: 0; margin: 0;">'
-        '<li><a href="https://docs.google.com/document/d/1ZOsMZiBEGlKgvP8tfU1wVtKR3AVhE48K/edit?usp=sharing&ouid=115965191483790562336&rtpof=true&sd=true" '
-        'target="_blank" style="color: #DC1E35; text-decoration: none; font-weight: 600;">'
-        'Syllabus Outline for Individual and Premium Research Program &rarr;</a></li>'
-        '</ul></div>',
-        unsafe_allow_html=True,
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.25rem 1.5rem;'
+        'box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1rem;">'
+        '<div style="font-size:0.85rem;color:#64748B;margin-bottom:0.75rem;">Base your syllabus on one of the templates below depending on your student\'s program.</div>'
+        + link_item("Syllabus Outline — Individual & Premium Research Program", "https://docs.google.com/document/d/10dxpWF1-LiJz77to7gC7HEf90me1MxuQGYek5n6UKqs/edit")
+        + link_item("Syllabus Outline — Research Fellowship", "https://docs.google.com/spreadsheets/d/1KE9xVF78F6g0J1LcpyzPLt5vp1he7NRBFUEBc_AucaI/edit#gid=0")
+        + link_item("Non-Branded Syllabus — Partner Programs (Individual & Premium)", "https://docs.google.com/document/d/1ZOsMZiBEGlKgvP8tfU1wVtKR3AVhE48K/edit?usp=sharing&ouid=115965191483790562336&rtpof=true&sd=true")
+        + '</div>',
+        unsafe_allow_html=True
     )
 
 # VIEW A: ASSIGNED STUDENTS
