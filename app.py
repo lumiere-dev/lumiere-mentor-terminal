@@ -856,13 +856,7 @@ def show_resources():
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
     st.markdown('<p class="main-header">Prospective Students</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Track onboarding progress for your assigned students</p>', unsafe_allow_html=True)
-
-    st.info(
-        "**Note:** A student has officially completed their onboarding process and confirmed you as a mentor "
-        "only once the 'Student Confirmed Mentor Match?' column says 'Yes'. Otherwise, they are still "
-        "completing onboarding formalities."
-    )
+    st.markdown('<p class="sub-header">These are your prospective students, and where they are in the onboarding pipeline. As a reminder, once you\'ve confirmed that you\'d like to work with a student, the student needs to confirm by paying full tuition — then we kick off!</p>', unsafe_allow_html=True)
 
     if not students:
         st.info("No students assigned to you yet.")
