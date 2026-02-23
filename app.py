@@ -1086,45 +1086,40 @@ def show_student_background(student):
     pm_name = student.get("program_manager_name") or "Not specified"
     pm_email = student.get("program_manager_email") or "Not specified"
 
-    def field_block(label, value):
-        return f"""
-        <div>
-            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">
-                {label}
-            </div>
-            <div style="font-size:0.95rem; color:#1A1A2E; font-weight:500;">{value or "Not specified"}</div>
-        </div>"""
+    def fb(label, value):
+        v = value or "Not specified"
+        return (f'<div style="margin-bottom:0.1rem;">'
+                f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>'
+                f'<div style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{v}</div>'
+                f'</div>')
+
+    grad_year = str(student["graduation_year"]) if student["graduation_year"] else None
 
     # Section 1: Student Overview
     st.markdown("#### Student Overview")
     st.markdown(
-        f"""<div style="background:#FFFFFF; border-radius:12px; padding:1.5rem;
-                        box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:1.25rem;">
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem;">
-                {field_block("Preferred Name", student.get("preferred_name"))}
-                {field_block("Location", location)}
-                {field_block("Graduation Year", str(student["graduation_year"]) if student["graduation_year"] else None)}
-                {field_block("Current Grade in School", student.get("current_grade"))}
-                {field_block("Research Area", student.get("research_area"))}
-                {field_block("Status in Program", student.get("student_status"))}
-            </div>
-        </div>""",
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">'
+        + fb("Preferred Name", student.get("preferred_name"))
+        + fb("Location", location)
+        + fb("Graduation Year", grad_year)
+        + fb("Current Grade in School", student.get("current_grade"))
+        + fb("Research Area", student.get("research_area"))
+        + fb("Status in Program", student.get("student_status"))
+        + '</div></div>',
         unsafe_allow_html=True
     )
 
     # Section 2: Program Details
     st.markdown("#### Program Details")
     st.markdown(
-        f"""<div style="background:#FFFFFF; border-radius:12px; padding:1.5rem;
-                        box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:1.25rem;">
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem;">
-                {field_block("Program Manager", pm_name)}
-                {field_block("PM Email", pm_email)}
-                {field_block("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))}
-                {field_block("Partner / White Label Program", student.get("white_label") or "No")}
-            </div>
-        </div>""",
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">'
+        + fb("Program Manager", pm_name)
+        + fb("PM Email", pm_email)
+        + fb("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))
+        + fb("Partner / White Label Program", student.get("white_label") or "No")
+        + '</div></div>',
         unsafe_allow_html=True
     )
 
@@ -1134,28 +1129,18 @@ def show_student_background(student):
 
     # Section 4: Coursework & Notes
     st.markdown("#### Background & Notes")
+    coursework = student.get("previous_coursework") or "Not specified"
+    notes = student.get("interview_notes") or "Not specified"
     st.markdown(
-        f"""<div style="background:#FFFFFF; border-radius:12px; padding:1.5rem;
-                        box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:1.25rem;">
-            <div style="margin-bottom:1.25rem;">
-                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">
-                    Student has completed coursework in
-                </div>
-                <div style="font-size:0.92rem; color:#1A1A2E; line-height:1.6;">
-                    {student.get("previous_coursework") or "Not specified"}
-                </div>
-            </div>
-            <div style="border-top:1px solid #F1F5F9; padding-top:1.25rem;">
-                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">
-                    Notes from our team for this student
-                </div>
-                <div style="font-size:0.92rem; color:#1A1A2E; line-height:1.6;">
-                    {student.get("interview_notes") or "Not specified"}
-                </div>
-            </div>
-        </div>""",
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+        '<div style="margin-bottom:1.25rem;">'
+        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Student has completed coursework in</div>'
+        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{coursework}</div>'
+        '</div>'
+        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;">'
+        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Notes from our team for this student</div>'
+        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{notes}</div>'
+        '</div></div>',
         unsafe_allow_html=True
     )
 
