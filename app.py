@@ -110,7 +110,7 @@ STUDENT_FIELDS = {
     "revised_final_paper_due": "PM: Student's Revised Final Paper - Due date",
     "student_no_shows": "[Current + Archived] No. of Student No Shows in Mentor Meetings",
     "reason_for_interest": "Reason for Interest in Areas",
-    "white_label": "White Label or Partner Program",
+    "white_label": "White Label or Partner Payment Program",
     "previous_coursework": "Previous Coursework",
     "interview_notes": "Interview Notes For The Mentor",
     "preferred_name": "Preferred Name",
@@ -1124,7 +1124,7 @@ def show_student_background(student):
         + fb("Writing Coach", student.get("writing_coach_name"))
         + fb("Writing Coach Email", student.get("writing_coach_email"))
         + fb("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))
-        + fb("Partner / White Label Program", student.get("white_label") or "No")
+        + fb("Is this student part of a partner/white label program?", student.get("white_label") or "No")
         + '</div></div>',
         unsafe_allow_html=True
     )
