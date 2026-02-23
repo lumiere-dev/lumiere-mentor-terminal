@@ -1051,7 +1051,20 @@ def show_confirmed_students(students):
                 st.rerun()
 
 def show_mentor_meeting_summary(student):
-    st.markdown("### Mentor Meeting Summary")
+    st.markdown("### Meeting Summary")
+
+    st.markdown(
+        '<a href="https://airtable.com/appK9HemdsQBzVefU/shrKPtNpRyPI9eLuu" target="_blank" style="text-decoration:none;">'
+        '<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:1rem 1.25rem;'
+        'margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;">'
+        '<div>'
+        '<div style="font-size:0.9rem;font-weight:700;color:#C2410C;margin-bottom:0.2rem;">📝 Just had a meeting?</div>'
+        '<div style="font-size:0.85rem;color:#9A3412;">Fill out the Meeting Update Form to log your notes and progress.</div>'
+        '</div>'
+        '<div style="font-size:0.85rem;font-weight:700;color:#C2410C;white-space:nowrap;margin-left:1rem;">Open Form →</div>'
+        '</div></a>',
+        unsafe_allow_html=True
+    )
 
     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
 
