@@ -114,7 +114,7 @@ STUDENT_FIELDS = {
     "previous_coursework": "Previous Coursework",
     "interview_notes": "Interview Notes For The Mentor",
     "preferred_name": "Preferred Name",
-    "student_status": "Student Status in Program"
+    "student_status": "PM: Student Status in Program"
 }
 
 DEADLINE_FIELDS = {
@@ -1094,7 +1094,7 @@ def show_student_background(student):
         st.markdown("**🔬 Research Area - First Preference**")
         st.markdown(student["research_area"] or "Not specified")
 
-        st.markdown("**📌 Student Status in Program**")
+        st.markdown("**📌 Status in Program**")
         st.markdown(student.get("student_status") or "Not specified")
 
         with st.expander("💡 Reason for Interest in Areas"):
