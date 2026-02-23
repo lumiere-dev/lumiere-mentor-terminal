@@ -643,7 +643,9 @@ def show_login_page():
 
     with col2:
         # Logo + header inside the card
-        st.image("assets/lumiere_logo.png", use_container_width=True)
+        _, img_col, _ = st.columns([1, 2, 1])
+        with img_col:
+            st.image("assets/lumiere_logo.png", use_container_width=True)
         st.markdown(
             '<h2 style="text-align:center; color:#1A1A2E; font-size:1.5rem; font-weight:700; margin:0.5rem 0 0.25rem;">Mentor Portal</h2>',
             unsafe_allow_html=True
