@@ -115,7 +115,8 @@ STUDENT_FIELDS = {
     "interview_notes": "Interview Notes For The Mentor",
     "preferred_name": "Preferred Name",
     "student_status": "PM: Student Status in Program",
-    "current_grade": "Current Grade in School"
+    "current_grade": "Current Grade in School",
+    "country": "Country of Residence"
 }
 
 DEADLINE_FIELDS = {
@@ -346,7 +347,8 @@ def get_students_for_mentor(mentor_name):
                 "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
                 "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
                 "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
-                "current_grade": fields.get(STUDENT_FIELDS["current_grade"], "")
+                "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
+                "country": fields.get(STUDENT_FIELDS["country"], "")
             })
         return students
     except Exception as e:
@@ -1087,7 +1089,10 @@ def show_student_background(student):
 
     with col1:
         st.markdown("**📍 City of Residence**")
-        st.markdown(student["city"] or "Not specified")
+        city = student["city"] or ""
+        country = student.get("country") or ""
+        location = ", ".join(filter(None, [city, country])) or "Not specified"
+        st.markdown(location)
 
         st.markdown("**🎓 Graduation Year**")
         st.markdown(str(student["graduation_year"]) if student["graduation_year"] else "Not specified")
