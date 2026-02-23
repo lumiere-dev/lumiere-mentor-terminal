@@ -348,7 +348,7 @@ def get_students_for_mentor(mentor_name):
                 "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
                 "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
                 "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
-                "country": fields.get(STUDENT_FIELDS["country"], "")
+                "country": unwrap(fields.get(STUDENT_FIELDS["country"], ""))
             })
         return students
     except Exception as e:
