@@ -116,7 +116,7 @@ STUDENT_FIELDS = {
     "preferred_name": "Preferred Name",
     "student_status": "PM: Student Status in Program",
     "current_grade": "Current Grade in School",
-    "country": "Country of Residence"
+    "country": "Country of Residence (single select)"
 }
 
 DEADLINE_FIELDS = {
@@ -348,8 +348,7 @@ def get_students_for_mentor(mentor_name):
                 "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
                 "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
                 "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
-                "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
-                "_raw_field_keys": list(fields.keys())
+                "country": unwrap(fields.get(STUDENT_FIELDS["country"], ""))
             })
         return students
     except Exception as e:
@@ -1082,9 +1081,7 @@ def show_mentor_meeting_summary(student):
 
 def show_student_background(student):
     st.markdown("### Student Background")
-    if st.session_state.get("is_preview"):
-        with st.expander("🛠️ Debug: raw Airtable field names"):
-            st.write(sorted(student.get("_raw_field_keys", [])))
+
 
     st.markdown("**🏷️ Preferred Name**")
     st.markdown(student.get("preferred_name") or "Not specified")
