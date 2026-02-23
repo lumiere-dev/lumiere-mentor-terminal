@@ -895,28 +895,28 @@ def show_assigned_students(students):
                     <div>
                         <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
                                     text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Mentor Confirmed Match?
+                            Have you indicated interest to work with this student?
                         </div>
                         {status_badge(confirmation)}
                     </div>
                     <div>
                         <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
                                     text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Background Shared with Student?
+                            Has your bio been shared with the student?
                         </div>
                         {status_badge(shared)}
                     </div>
                     <div>
                         <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
                                     text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Foundation Student?
+                            Is this a Foundation student?
                         </div>
                         {status_badge(foundation)}
                     </div>
                     <div>
                         <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
                                     text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Student Confirmed Match?
+                            Has the student confirmed this match?
                         </div>
                         {status_badge(tuition)}
                     </div>
