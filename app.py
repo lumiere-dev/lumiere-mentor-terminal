@@ -623,6 +623,12 @@ def show_login_page():
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) hr {
             border-color: #E2E8F0 !important;
         }
+        /* Centre the logo image */
+        [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) img,
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) img {
+            display: block !important;
+            margin: 0 auto !important;
+        }
         /* Expander (Team Access) inside card */
         [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:nth-child(2) details,
         [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2) details {
