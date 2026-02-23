@@ -118,7 +118,9 @@ STUDENT_FIELDS = {
     "current_grade": "Current Grade in School",
     "country": "Country of Residence (single select)",
     "writing_coach_name": "Writing Coach Name (Text)",
-    "writing_coach_email": "Writing Coach Email"
+    "writing_coach_email": "Writing Coach Email",
+    "publication_specialist_name": "Publication Specialist (Text)",
+    "publication_specialist_email": "Publication Specialist Email"
 }
 
 DEADLINE_FIELDS = {
@@ -352,7 +354,9 @@ def get_students_for_mentor(mentor_name):
                 "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
                 "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
                 "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
-                "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], ""))
+                "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
+                "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
+                "publication_specialist_email": fields.get(STUDENT_FIELDS["publication_specialist_email"], "")
             })
         return students
     except Exception as e:
@@ -1126,19 +1130,36 @@ def show_student_background(student):
     )
 
     # Section 2: Program Details
-    st.markdown("#### Program Details")
-    st.markdown(
+    wc_name = student.get("writing_coach_name") or ""
+    wc_email = student.get("writing_coach_email") or ""
+    ps_name = student.get("publication_specialist_name") or ""
+    ps_email = student.get("publication_specialist_email") or ""
+
+    def person_row(role, name, email, border=True):
+        border_style = "border-bottom:1px solid #F1F5F9;padding-bottom:1rem;margin-bottom:1rem;" if border else ""
+        return (
+            f'<div style="{border_style}display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+            + fb(role, name)
+            + fb(f"{role} Email", email)
+            + '</div>'
+        )
+
+    details_html = (
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">'
-        + fb("Program Manager", pm_name)
-        + fb("Program Manager Email", pm_email)
-        + fb("Writing Coach", student.get("writing_coach_name"))
-        + fb("Writing Coach Email", student.get("writing_coach_email"))
+        + person_row("Program Manager", pm_name, pm_email, border=bool(wc_name or ps_name))
+    )
+    if wc_name:
+        details_html += person_row("Writing Coach", wc_name, wc_email, border=bool(ps_name))
+    if ps_name:
+        details_html += person_row("Publication Specialist", ps_name, ps_email, border=False)
+    details_html += (
+        '<div style="border-top:1px solid #F1F5F9;padding-top:1rem;margin-top:0.25rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
         + fb("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))
         + fb("Is this student part of a partner/white label program?", student.get("white_label") or "No")
-        + '</div></div>',
-        unsafe_allow_html=True
+        + '</div></div>'
     )
+    st.markdown("#### Program Details")
+    st.markdown(details_html, unsafe_allow_html=True)
 
     # Section 3: Reason for Interest
     with st.expander("💡 Reason for Interest in Research Areas"):
