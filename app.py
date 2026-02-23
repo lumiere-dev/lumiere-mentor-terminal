@@ -870,35 +870,61 @@ def show_assigned_students(students):
     filtered = students if selected == "All Students" else [s for s in students if s["name"] == selected]
 
     for student in filtered:
-        with st.expander(student["name"]):
-            col1, col2 = st.columns(2)
+        def status_badge(value):
+            if value == "Yes":
+                return f'<span style="background:#ECFDF5; color:#065F46; padding:0.2rem 0.65rem; border-radius:20px; font-size:0.8rem; font-weight:600;">✓ Yes</span>'
+            elif value and value != "—":
+                return f'<span style="background:#FFFBEB; color:#92400E; padding:0.2rem 0.65rem; border-radius:20px; font-size:0.8rem; font-weight:600;">{value}</span>'
+            else:
+                return f'<span style="background:#F1F5F9; color:#64748B; padding:0.2rem 0.65rem; border-radius:20px; font-size:0.8rem; font-weight:600;">—</span>'
 
-            with col1:
-                confirmation = student["mentor_confirmation"] or "—"
-                st.markdown("**Mentor Confirmed Student Match?**")
-                if confirmation == "Yes":
-                    st.markdown(':green[Yes]')
-                else:
-                    st.markdown(f':orange[{confirmation}]' if confirmation != "—" else confirmation)
+        confirmation = student["mentor_confirmation"] or "—"
+        shared = student["background_shared"] or "—"
+        foundation = student.get("foundation_student", "") or "—"
+        tuition = student.get("tuition_paid", "") or "—"
 
-                shared = student["background_shared"] or "—"
-                st.markdown("**Mentor Background Shared with Student?**")
-                if shared == "Yes":
-                    st.markdown(':green[Yes]')
-                else:
-                    st.markdown(f':orange[{shared}]' if shared != "—" else shared)
-
-            with col2:
-                foundation = student.get("foundation_student", "") or "—"
-                st.markdown("**Is this a Foundation Student?**")
-                st.markdown(foundation)
-
-                tuition = student.get("tuition_paid", "") or "—"
-                st.markdown("**Student Confirmed Mentor Match?**")
-                if tuition == "Yes":
-                    st.markdown(':green[Yes]')
-                else:
-                    st.markdown(f':orange[{tuition}]' if tuition != "—" else tuition)
+        st.markdown(
+            f"""
+            <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                        margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                        border-left:4px solid #BE1E2D;">
+                <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:1rem;">
+                    {student["name"]}
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 2rem;">
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                            Mentor Confirmed Match?
+                        </div>
+                        {status_badge(confirmation)}
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                            Background Shared with Student?
+                        </div>
+                        {status_badge(shared)}
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                            Foundation Student?
+                        </div>
+                        {status_badge(foundation)}
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                            Student Confirmed Match?
+                        </div>
+                        {status_badge(tuition)}
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
