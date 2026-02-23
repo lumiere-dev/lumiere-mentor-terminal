@@ -996,7 +996,7 @@ def show_confirmed_students(students):
             else:
                 st.markdown("---")
 
-            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Your Meeting Notes with the Student", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
+            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
             with tab1:
                 show_student_background(selected)
             with tab2:
@@ -1086,7 +1086,7 @@ def show_mentor_meeting_summary(student):
         st.markdown(str(student.get("student_no_shows", 0) or 0))
 
     st.markdown("---")
-    st.markdown("### Meeting Notes")
+    st.markdown("### Your Meeting Notes with the Student")
 
     meeting_notes = get_meeting_notes_for_student(student["name"])
 
