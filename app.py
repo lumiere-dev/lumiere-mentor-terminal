@@ -1080,62 +1080,84 @@ def show_mentor_meeting_summary(student):
                 st.markdown(note["notes"] or "No notes recorded.")
 
 def show_student_background(student):
-    st.markdown("### Student Background")
+    city = student["city"] or ""
+    country = student.get("country") or ""
+    location = ", ".join(filter(None, [city, country])) or "Not specified"
+    pm_name = student.get("program_manager_name") or "Not specified"
+    pm_email = student.get("program_manager_email") or "Not specified"
 
+    def field_block(label, value):
+        return f"""
+        <div>
+            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">
+                {label}
+            </div>
+            <div style="font-size:0.95rem; color:#1A1A2E; font-weight:500;">{value or "Not specified"}</div>
+        </div>"""
 
-    st.markdown("**🏷️ Preferred Name**")
-    st.markdown(student.get("preferred_name") or "Not specified")
+    # Section 1: Student Overview
+    st.markdown("#### Student Overview")
+    st.markdown(
+        f"""<div style="background:#FFFFFF; border-radius:12px; padding:1.5rem;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:1.25rem;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem;">
+                {field_block("Preferred Name", student.get("preferred_name"))}
+                {field_block("Location", location)}
+                {field_block("Graduation Year", str(student["graduation_year"]) if student["graduation_year"] else None)}
+                {field_block("Current Grade in School", student.get("current_grade"))}
+                {field_block("Research Area", student.get("research_area"))}
+                {field_block("Status in Program", student.get("student_status"))}
+            </div>
+        </div>""",
+        unsafe_allow_html=True
+    )
 
-    col1, col2 = st.columns(2)
+    # Section 2: Program Details
+    st.markdown("#### Program Details")
+    st.markdown(
+        f"""<div style="background:#FFFFFF; border-radius:12px; padding:1.5rem;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:1.25rem;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem;">
+                {field_block("Program Manager", pm_name)}
+                {field_block("PM Email", pm_email)}
+                {field_block("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))}
+                {field_block("Partner / White Label Program", student.get("white_label") or "No")}
+            </div>
+        </div>""",
+        unsafe_allow_html=True
+    )
 
-    with col1:
-        st.markdown("**📍 City of Residence**")
-        city = student["city"] or ""
-        country = student.get("country") or ""
-        location = ", ".join(filter(None, [city, country])) or "Not specified"
-        st.markdown(location)
+    # Section 3: Reason for Interest
+    with st.expander("💡 Reason for Interest in Research Areas"):
+        st.markdown(student.get("reason_for_interest") or "Not specified")
 
-        st.markdown("**🎓 Graduation Year**")
-        st.markdown(str(student["graduation_year"]) if student["graduation_year"] else "Not specified")
-
-        st.markdown("**📊 Current Grade in School**")
-        st.markdown(student.get("current_grade") or "Not specified")
-
-    with col2:
-        st.markdown("**🔬 Research Area - First Preference**")
-        st.markdown(student["research_area"] or "Not specified")
-
-        st.markdown("**📌 Status in Program**")
-        st.markdown(student.get("student_status") or "Not specified")
-
-        with st.expander("💡 Reason for Interest in Areas"):
-            st.markdown(student.get("reason_for_interest") or "Not specified")
-
-    st.markdown("---")
-
-    col3, col4 = st.columns(2)
-
-    with col3:
-        st.markdown("**📧 Program Manager**")
-        pm_name = student.get("program_manager_name") or "Not specified"
-        pm_email = student.get("program_manager_email") or "Not specified"
-        st.markdown(f"{pm_name} — {pm_email}")
-
-    with col4:
-        st.markdown("**📅 Student's Revised Final Paper Due Date**")
-        st.markdown(format_date(student.get("revised_final_paper_due", "")))
-
-    st.markdown("---")
-    st.markdown("**🏷️ White Label or Partner Program**")
-    st.markdown(student.get("white_label") or "No")
-
-    st.markdown("---")
-    st.markdown("**📚 Student has completed coursework in:**")
-    st.markdown(student.get("previous_coursework") or "Not specified")
-
-    st.markdown("---")
-    st.markdown("**🗒️ Notes from our team for this student**")
-    st.markdown(student.get("interview_notes") or "Not specified")
+    # Section 4: Coursework & Notes
+    st.markdown("#### Background & Notes")
+    st.markdown(
+        f"""<div style="background:#FFFFFF; border-radius:12px; padding:1.5rem;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:1.25rem;">
+            <div style="margin-bottom:1.25rem;">
+                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">
+                    Student has completed coursework in
+                </div>
+                <div style="font-size:0.92rem; color:#1A1A2E; line-height:1.6;">
+                    {student.get("previous_coursework") or "Not specified"}
+                </div>
+            </div>
+            <div style="border-top:1px solid #F1F5F9; padding-top:1.25rem;">
+                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">
+                    Notes from our team for this student
+                </div>
+                <div style="font-size:0.92rem; color:#1A1A2E; line-height:1.6;">
+                    {student.get("interview_notes") or "Not specified"}
+                </div>
+            </div>
+        </div>""",
+        unsafe_allow_html=True
+    )
 
 def show_student_deadlines_and_submissions(student):
     st.markdown("### Student Deadlines & Submissions")
