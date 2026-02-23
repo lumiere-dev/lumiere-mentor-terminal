@@ -944,15 +944,6 @@ def show_confirmed_students(students):
                 show_mentor_submissions(selected)
             return
 
-    # Helper text
-    st.info(
-        "This list contains all the students you are working with or have worked with "
-        "(including those who have since completed their program).\n\n"
-        "**Note:** The student list is ordered based on the most recent Revised Final Paper due date. "
-        "In case you have been introduced to a student but cannot find them on this list, "
-        "please use the search bar to locate them, otherwise reach out to your program manager for assistance!"
-    )
-
     # Filter by student name
     student_names = ["All Students"] + [s["name"] for s in confirmed_students]
     selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
