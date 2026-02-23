@@ -114,7 +114,8 @@ STUDENT_FIELDS = {
     "previous_coursework": "Previous Coursework",
     "interview_notes": "Interview Notes For The Mentor",
     "preferred_name": "Preferred Name",
-    "student_status": "PM: Student Status in Program"
+    "student_status": "PM: Student Status in Program",
+    "current_grade": "Current Grade in School"
 }
 
 DEADLINE_FIELDS = {
@@ -344,7 +345,8 @@ def get_students_for_mentor(mentor_name):
                 "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
                 "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
                 "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
-                "student_status": fields.get(STUDENT_FIELDS["student_status"], "")
+                "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
+                "current_grade": fields.get(STUDENT_FIELDS["current_grade"], "")
             })
         return students
     except Exception as e:
@@ -1078,6 +1080,11 @@ def show_mentor_meeting_summary(student):
 def show_student_background(student):
     st.markdown("### Student Background")
 
+    st.markdown("**🏷️ Preferred Name**")
+    st.markdown(student.get("preferred_name") or "Not specified")
+
+    st.markdown("---")
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -1087,8 +1094,8 @@ def show_student_background(student):
         st.markdown("**🎓 Graduation Year**")
         st.markdown(str(student["graduation_year"]) if student["graduation_year"] else "Not specified")
 
-        st.markdown("**🏷️ Preferred Name**")
-        st.markdown(student.get("preferred_name") or "Not specified")
+        st.markdown("**📊 Current Grade in School**")
+        st.markdown(student.get("current_grade") or "Not specified")
 
     with col2:
         st.markdown("**🔬 Research Area - First Preference**")
