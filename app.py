@@ -964,21 +964,46 @@ def show_confirmed_students(students):
 
     # Student list
     for student in confirmed_students:
-        col1, col2, col3 = st.columns([3, 2, 2])
-        with col1:
-            if st.button(student["name"], key=f"student_{student['id']}", use_container_width=True):
+        pm_name = student.get("program_manager_name") or "—"
+        pm_email = student.get("program_manager_email") or "—"
+        due = format_date(student.get("revised_final_paper_due", ""))
+
+        card_col, btn_col = st.columns([6, 1])
+        with card_col:
+            st.markdown(
+                f"""
+                <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                            margin-bottom:0.75rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                            border-left:4px solid #BE1E2D;">
+                    <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
+                        {student["name"]}
+                    </div>
+                    <div style="display:flex; gap:3rem; flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Program Manager
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
+                            <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Revised Final Paper Due
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        with btn_col:
+            st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+            if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
                 st.session_state.selected_student_name = student["name"]
                 st.rerun()
-        with col2:
-            pm_name = student.get("program_manager_name") or "—"
-            pm_email = student.get("program_manager_email") or "—"
-            st.caption(f"**Program Manager**")
-            st.caption(f"{pm_name} · {pm_email}")
-        with col3:
-            due = format_date(student.get("revised_final_paper_due", ""))
-            st.caption(f"**Revised Final Paper Due**")
-            st.caption(due)
-        st.markdown("---")
 
 def show_mentor_meeting_summary(student):
     st.markdown("### Mentor Meeting Summary")
