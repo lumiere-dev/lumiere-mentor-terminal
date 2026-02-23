@@ -1083,8 +1083,6 @@ def show_student_background(student):
     st.markdown("**🏷️ Preferred Name**")
     st.markdown(student.get("preferred_name") or "Not specified")
 
-    st.markdown("---")
-
     col1, col2 = st.columns(2)
 
     with col1:
