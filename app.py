@@ -231,7 +231,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     [data-testid="stSidebar"] .stCaption p {
-        color: #94A3B8 !important;
+        color: #FFFFFF !important;
     }
     [data-testid="stSidebar"] hr {
         border-color: rgba(255,255,255,0.2);
