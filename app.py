@@ -1043,6 +1043,7 @@ def show_confirmed_students(students):
         pm_email = student.get("program_manager_email") or "—"
         due = format_date(student.get("revised_final_paper_due", ""))
         white_label = student.get("white_label", "") or "—"
+        preferred_name = student.get("preferred_name", "") or "—"
 
         card_col, btn_col = st.columns([6, 1])
         with card_col:
@@ -1055,6 +1056,13 @@ def show_confirmed_students(students):
                         {student["name"]}
                     </div>
                     <div style="display:flex; gap:3rem; flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Preferred Name
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
+                        </div>
                         <div>
                             <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
                                         text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
