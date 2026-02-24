@@ -781,7 +781,7 @@ def show_dashboard():
     with st.sidebar:
         st.image("assets/lumiere_logo_symbol.png", width=80)
         st.markdown(f"### Welcome, {st.session_state.mentor_name}")
-        st.markdown(f'<p style="color:#FFFFFF; font-size:0.85rem; margin:0;">{st.session_state.mentor_email}</p>', unsafe_allow_html=True)
+        st.markdown(f'<p style="color:#FFFFFF; font-size:0.85rem; margin-top:-0.75rem;">{st.session_state.mentor_email}</p>', unsafe_allow_html=True)
 
         if st.session_state.is_preview:
             st.warning("👁️ Preview Mode")
