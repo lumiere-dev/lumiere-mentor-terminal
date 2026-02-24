@@ -1245,25 +1245,36 @@ def show_student_deadlines_and_submissions(student):
         st.info("No deadlines found for this student.")
         return
 
-    # Show most upcoming deadline
-    upcoming = [d for d in deadlines if d["status"] != "Submitted" and d["due_date"]]
-    if upcoming:
-        try:
-            now = datetime.now()
-            future = [d for d in upcoming if datetime.strptime(d["due_date"], "%Y-%m-%d") >= now]
-            if future:
-                next_deadline = future[0]  # already sorted by due_date
-                days_left = (datetime.strptime(next_deadline["due_date"], "%Y-%m-%d") - now).days
-                st.markdown(
-                    f'<div style="background: rgba(220,30,53,0.1); border: 1px solid #DC1E35; '
-                    f'border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">'
-                    f'<strong>⏰ Next Deadline:</strong> {next_deadline["type"]} — '
-                    f'due {format_date(next_deadline["due_date"])} ({days_left} day{"s" if days_left != 1 else ""} away)'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-        except Exception:
-            pass
+    # Show overdue and next upcoming deadline banners
+    try:
+        now = datetime.now()
+        pending = [d for d in deadlines if d["status"] != "Submitted" and d["due_date"]]
+        overdue = [d for d in pending if datetime.strptime(d["due_date"], "%Y-%m-%d") < now]
+        future = [d for d in pending if datetime.strptime(d["due_date"], "%Y-%m-%d") >= now]
+
+        if overdue:
+            overdue_list = ", ".join(f"{d['type']} ({format_date(d['due_date'])})" for d in overdue)
+            st.markdown(
+                f'<div style="background: rgba(239,68,68,0.1); border: 1px solid #EF4444; '
+                f'border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem;">'
+                f'<strong>⚠️ Overdue:</strong> {overdue_list}'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+        if future:
+            next_deadline = future[0]
+            days_left = (datetime.strptime(next_deadline["due_date"], "%Y-%m-%d") - now).days
+            st.markdown(
+                f'<div style="background: rgba(220,30,53,0.1); border: 1px solid #DC1E35; '
+                f'border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">'
+                f'<strong>⏰ Next Deadline:</strong> {next_deadline["type"]} — '
+                f'due {format_date(next_deadline["due_date"])} ({days_left} day{"s" if days_left != 1 else ""} away)'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+    except Exception:
+        pass
 
     for deadline in deadlines:
         status = deadline["status"]
