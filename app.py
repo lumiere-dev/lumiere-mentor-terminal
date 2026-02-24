@@ -987,9 +987,10 @@ def show_confirmed_students(students):
                 partner = selected["white_label"]
                 st.markdown(
                     f'<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:1rem 1.25rem;margin:0.75rem 0 1rem 0;">'
-                    f'<div style="font-size:0.85rem;font-weight:700;color:#1E40AF;margin-bottom:0.3rem;">🤝 Partner / White Label Student — {partner}</div>'
+                    f'<div style="font-size:0.85rem;font-weight:700;color:#1E40AF;margin-bottom:0.3rem;">🤝 White Label Student — {partner}</div>'
                     f'<div style="font-size:0.85rem;color:#1E3A8A;line-height:1.6;">'
-                    f'This student is enrolled through a partner program. While Lumiere runs the research program on the backend, the student receives all program resources, communications, and branding through <strong>{partner}</strong> — not directly from Lumiere.'
+                    f'This student is enrolled through a partner program. While Lumiere runs the research program on the backend, the student receives all program resources, communications, and branding through <strong>{partner}</strong> — not directly from Lumiere. '
+                    f'<strong>Please refrain from mentioning Lumiere in your communication with this student.</strong>'
                     f'</div></div>',
                     unsafe_allow_html=True
                 )
