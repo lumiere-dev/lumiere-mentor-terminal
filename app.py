@@ -541,6 +541,23 @@ def format_notes_summary(text):
 
     return '\n\n'.join(formatted_lines)
 
+def normalize_tuition_paid(value):
+    """Collapse various tuition paid values to Yes or No"""
+    if not value or value == "—":
+        return value
+    v = value.strip().lower()
+    if v == "yes":
+        return "Yes"
+    if v == "no":
+        return "No"
+    # Check negative signals before positive (so "pending payment" doesn't hit "pay")
+    if "pending" in v or "clarification" in v:
+        return "No"
+    # Positive signals: paid, will pay, etc.
+    if "paid" in v or "pay" in v:
+        return "Yes"
+    return "No"
+
 def is_overdue(due_date_str, status):
     """Check if deadline is overdue"""
     if status == "Submitted":
@@ -889,7 +906,7 @@ def show_assigned_students(students):
         confirmation = student["mentor_confirmation"] or "—"
         shared = student["background_shared"] or "—"
         foundation = student.get("foundation_student", "") or "—"
-        tuition = student.get("tuition_paid", "") or "—"
+        tuition = normalize_tuition_paid(student.get("tuition_paid", "") or "—")
         white_label = student.get("white_label", "") or "—"
 
         st.markdown(
