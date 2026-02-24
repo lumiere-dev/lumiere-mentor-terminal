@@ -1176,7 +1176,7 @@ def show_student_background(student):
     details_html += (
         '<div style="border-top:1px solid #F1F5F9;padding-top:1rem;margin-top:0.25rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
         + fb("Revised Final Paper Due", format_date(student.get("revised_final_paper_due", "")))
-        + fb("Is this student part of a partner/white label program?", student.get("white_label") or "No")
+        + fb("Is this student part of a white label program?", student.get("white_label") or "No")
         + '</div></div>'
     )
     st.markdown("#### Program Details")
