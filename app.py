@@ -541,6 +541,21 @@ def format_notes_summary(text):
 
     return '\n\n'.join(formatted_lines)
 
+def due_date_sort_key(s):
+    """Sort key: upcoming soonest first, then overdue, then no date."""
+    today = datetime.now().date()
+    raw = s.get("revised_final_paper_due")
+    if not raw:
+        return (2, "9999-99-99")
+    try:
+        d = datetime.strptime(raw, "%Y-%m-%d").date()
+        if d >= today:
+            return (0, raw)   # upcoming → top
+        else:
+            return (1, raw)   # overdue → middle
+    except:
+        return (2, "9999-99-99")
+
 def normalize_tuition_paid(value):
     """Collapse various tuition paid values to Yes or No"""
     if not value or value == "—":
@@ -887,6 +902,8 @@ def show_assigned_students(students):
         st.info("No students assigned to you yet.")
         return
 
+    students = sorted(students, key=due_date_sort_key)
+
     st.markdown(f"**Your Prospective Students** — {len(students)} student{'s' if len(students) != 1 else ''}")
 
     # Student filter
@@ -972,19 +989,6 @@ def show_confirmed_students(students):
         return
 
     # Sort: upcoming due dates soonest first, overdue/empty dates at the bottom
-    today = datetime.now().date()
-    def due_date_sort_key(s):
-        raw = s.get("revised_final_paper_due")
-        if not raw:
-            return (2, "9999-99-99")  # no date → bottom
-        try:
-            d = datetime.strptime(raw, "%Y-%m-%d").date()
-            if d >= today:
-                return (0, raw)   # upcoming → top, sorted ascending
-            else:
-                return (1, raw)   # overdue → middle-bottom, sorted ascending
-        except:
-            return (2, "9999-99-99")
     confirmed_students.sort(key=due_date_sort_key)
 
     # If a student is selected, show their profile
