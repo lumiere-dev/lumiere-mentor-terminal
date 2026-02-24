@@ -890,6 +890,7 @@ def show_assigned_students(students):
         shared = student["background_shared"] or "—"
         foundation = student.get("foundation_student", "") or "—"
         tuition = student.get("tuition_paid", "") or "—"
+        white_label = student.get("white_label", "") or "—"
 
         st.markdown(
             f"""
@@ -927,6 +928,13 @@ def show_assigned_students(students):
                             Has the student confirmed this match?
                         </div>
                         {status_badge(tuition)}
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                            Is this a white label student?
+                        </div>
+                        {status_badge(white_label)}
                     </div>
                 </div>
             </div>
@@ -1012,6 +1020,7 @@ def show_confirmed_students(students):
         pm_name = student.get("program_manager_name") or "—"
         pm_email = student.get("program_manager_email") or "—"
         due = format_date(student.get("revised_final_paper_due", ""))
+        white_label = student.get("white_label", "") or "—"
 
         card_col, btn_col = st.columns([6, 1])
         with card_col:
@@ -1038,6 +1047,13 @@ def show_confirmed_students(students):
                                 Revised Final Paper Due
                             </div>
                             <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Is this a white label student?
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{white_label}</div>
                         </div>
                     </div>
                 </div>
@@ -1270,87 +1286,74 @@ def show_student_deadlines_and_submissions(student):
 def show_mentor_submissions(student):
     st.markdown("### Mentor Submissions")
 
-    # Syllabus from deadlines table
     all_deadlines = get_deadlines_for_student(student["name"])
     syllabus_deadlines = [d for d in all_deadlines if d["type"] == "Syllabus"]
+    eval_deadlines = [d for d in all_deadlines if d["type"] == "Evaluation & Feedback"]
 
+    def render_mentor_deadline(deadline, label):
+        status = deadline["status"]
+        due_date = deadline["due_date"]
+        overdue = is_overdue(due_date, status)
 
+        if status == "Submitted":
+            icon = "✅"
+        elif overdue:
+            icon = "⚠️"
+        else:
+            icon = "📅"
+
+        with st.container():
+            col1, col2, col3 = st.columns([2, 1, 1])
+            with col1:
+                st.markdown(f"{icon} **{label}**")
+            with col2:
+                st.markdown(f"**Due:** {format_date(due_date)}")
+            with col3:
+                if status == "Submitted":
+                    st.success(f"Submitted {format_datetime_ist(deadline['date_submitted'])}")
+                elif overdue:
+                    st.error("Overdue")
+                else:
+                    st.warning("Not Submitted")
+
+            if deadline.get("submissions"):
+                for field_name, value in deadline["submissions"].items():
+                    if isinstance(value, list):
+                        for attachment in value:
+                            if isinstance(attachment, dict):
+                                url = attachment.get("url", "")
+                                filename = attachment.get("filename", "Download")
+                                if url:
+                                    st.markdown(f"  📎 [{filename}]({url})")
+                            else:
+                                st.markdown(f"  📎 {attachment}")
+                    elif isinstance(value, str) and value.startswith("http"):
+                        st.markdown(f"  📎 [View Submission]({value})")
+                    else:
+                        st.markdown(f"  📄 {value}")
+
+    # Syllabus
     if not syllabus_deadlines:
         st.info("No syllabus deadline found for this student.")
     else:
         for deadline in syllabus_deadlines:
-            status = deadline["status"]
-            due_date = deadline["due_date"]
-            overdue = is_overdue(due_date, status)
-
-            if status == "Submitted":
-                icon = "✅"
-            elif overdue:
-                icon = "⚠️"
-            else:
-                icon = "📅"
-
-            with st.container():
-                col1, col2, col3 = st.columns([2, 1, 1])
-                with col1:
-                    st.markdown(f"{icon} **Syllabus**")
-                with col2:
-                    st.markdown(f"**Due:** {format_date(due_date)}")
-                with col3:
-                    if status == "Submitted":
-                        st.success(f"Submitted {format_datetime_ist(deadline['date_submitted'])}")
-                    elif overdue:
-                        st.error("Overdue")
-                    else:
-                        st.warning("Not Submitted")
-
-                if deadline.get("submissions"):
-                    for field_name, value in deadline["submissions"].items():
-                        if isinstance(value, list):
-                            for attachment in value:
-                                if isinstance(attachment, dict):
-                                    url = attachment.get("url", "")
-                                    filename = attachment.get("filename", "Download")
-                                    if url:
-                                        st.markdown(f"  📎 [{filename}]({url})")
-                                else:
-                                    st.markdown(f"  📎 {attachment}")
-                        elif isinstance(value, str) and value.startswith("http"):
-                            st.markdown(f"  📎 [View Submission]({value})")
-                        else:
-                            st.markdown(f"  📄 {value}")
+            render_mentor_deadline(deadline, "Syllabus")
 
     st.markdown("---")
 
-    # Evaluation & Feedback from progress table
-
-    eval_items = get_eval_feedback_for_student(student["name"])
-
-    if not eval_items:
+    # Evaluation & Feedback
+    if not eval_deadlines:
         with st.container():
-            col1, col2 = st.columns([2, 1])
+            col1, col2, col3 = st.columns([2, 1, 1])
             with col1:
-                st.markdown("📋 **Evaluation & Feedback**")
+                st.markdown("📅 **Evaluation & Feedback**")
             with col2:
+                st.markdown("**Due:** Not set")
+            with col3:
                 st.warning("Not Submitted")
     else:
-        for item in eval_items:
-            with st.container():
-                col1, col2 = st.columns([2, 1])
-                with col1:
-                    st.markdown("✅ **Evaluation & Feedback**")
-                with col2:
-                    if item["created_time"]:
-                        st.success(f"Submitted {format_datetime_ist(item['created_time'])}")
-                    else:
-                        st.success("Submitted")
-
-                if item["attachments"]:
-                    for att in item["attachments"]:
-                        if att["url"]:
-                            st.markdown(f"  📎 [{att['filename']}]({att['url']})")
-
-            st.markdown("---")
+        for deadline in eval_deadlines:
+            render_mentor_deadline(deadline, "Evaluation & Feedback")
 
 # Main app logic
 def main():
