@@ -370,13 +370,14 @@ def get_students_for_mentor(mentor_name):
         return []
 
 @st.cache_data(ttl=300)
-def get_prospective_students(mentor_name):
-    """Get prospective students for a mentor filtered by name, participation decision, and upcoming cohort"""
+def get_prospective_students(mentor_email):
+    """Get prospective students for a mentor, filtered by participation decision and upcoming cohort,
+    then matched by mentor email in Python (since Mentor Email is a lookup array field)."""
     tables = get_tables()
     try:
+        # Only use non-lookup fields in the Airtable formula
         formula = (
             f"AND("
-            f"FIND('{mentor_name}', ARRAYJOIN({{Mentor Name}})), "
             f"{{Written Confirmation/Participation Decision}} != \"No\", "
             f"FIND(\"True\", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}}))"
             f")"
@@ -386,6 +387,15 @@ def get_prospective_students(mentor_name):
         students = []
         for record in records:
             fields = record["fields"]
+
+            # Mentor Email is a lookup array — check if our email is in it
+            mentor_emails = fields.get("Mentor Email", [])
+            if isinstance(mentor_emails, list):
+                matched = any(e.strip().lower() == mentor_email.strip().lower() for e in mentor_emails)
+            else:
+                matched = str(mentor_emails).strip().lower() == mentor_email.strip().lower()
+            if not matched:
+                continue
 
             def unwrap(val, default=""):
                 if isinstance(val, list):
@@ -886,7 +896,7 @@ def show_dashboard():
         )
 
     if view == "📋 Prospective Students":
-        prospective = get_prospective_students(st.session_state.mentor_name)
+        prospective = get_prospective_students(st.session_state.mentor_email)
         show_assigned_students(prospective)
     elif view == "✅ Confirmed Students":
         students = get_students_for_mentor(st.session_state.mentor_name)
