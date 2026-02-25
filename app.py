@@ -1491,6 +1491,7 @@ def show_payment_information(student):
         + fb("Hourly Base Rate", rate_display)
         + yes_no_badge("Have you submitted the evaluation & feedback for this student?", eval_submitted)
         + yes_no_badge("Has the student submitted the revised final paper?", paper_submitted)
+        + fb("Total Meetings Completed", str(student.get("completed_meetings") or 0))
         + fb("Payment Status", student.get("mentor_payment_status") or "Not specified")
         + (fb("1st Payment Date", format_date(student.get("payment_date_1", ""))) if student.get("payment_date_1") else "")
         + (fb("2nd Payment Date", format_date(student.get("payment_date_2", ""))) if student.get("payment_date_2") else "")
