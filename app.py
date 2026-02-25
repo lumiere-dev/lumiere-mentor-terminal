@@ -364,6 +364,68 @@ def get_students_for_mentor(mentor_name):
         return []
 
 @st.cache_data(ttl=300)
+def get_prospective_students(mentor_email):
+    """Get prospective students for a mentor filtered by email, participation decision, and upcoming cohort"""
+    tables = get_tables()
+    try:
+        formula = (
+            f"AND("
+            f"FIND('{mentor_email}', ARRAYJOIN({{Mentor Email}})), "
+            f"{{Written Confirmation/Participation Decision}} != \"No\", "
+            f"{{Upcoming Cohort (Cohort Table)}} = TRUE()"
+            f")"
+        )
+        records = tables["students"].all(formula=formula)
+
+        students = []
+        for record in records:
+            fields = record["fields"]
+
+            def unwrap(val, default=""):
+                if isinstance(val, list):
+                    val = val[0] if val else default
+                val = val if val is not None else default
+                if isinstance(val, str):
+                    val = val.strip("[]'\"")
+                return val
+
+            students.append({
+                "id": record["id"],
+                "name": fields.get(STUDENT_FIELDS["name"], "Unknown"),
+                "research_area": fields.get(STUDENT_FIELDS["research_area"], ""),
+                "city": fields.get(STUDENT_FIELDS["city"], ""),
+                "graduation_year": fields.get(STUDENT_FIELDS["graduation_year"], ""),
+                "mentor_confirmation": fields.get(STUDENT_FIELDS["mentor_confirmation"], ""),
+                "background_shared": fields.get(STUDENT_FIELDS["background_shared"], ""),
+                "expected_meetings": fields.get(STUDENT_FIELDS["expected_meetings"], 0),
+                "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
+                "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
+                "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
+                "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
+                "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
+                "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
+                "program_manager_name": unwrap(fields.get(STUDENT_FIELDS["program_manager_name"], "")),
+                "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
+                "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
+                "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
+                "white_label": unwrap(fields.get(STUDENT_FIELDS["white_label"], "")),
+                "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
+                "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
+                "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
+                "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
+                "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
+                "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
+                "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
+                "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
+                "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
+                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], ""))
+            })
+        return students
+    except Exception as e:
+        st.error(f"Error fetching prospective students: {e}")
+        return []
+
+@st.cache_data(ttl=300)
 def get_deadlines_for_student(student_name):
     """Get all deadlines for a specific student"""
     tables = get_tables()
@@ -815,12 +877,11 @@ def show_dashboard():
             unsafe_allow_html=True
         )
 
-    # Get students
-    students = get_students_for_mentor(st.session_state.mentor_name)
-
     if view == "📋 Prospective Students":
-        show_assigned_students(students)
+        prospective = get_prospective_students(st.session_state.mentor_email)
+        show_assigned_students(prospective)
     elif view == "✅ Confirmed Students":
+        students = get_students_for_mentor(st.session_state.mentor_name)
         show_confirmed_students(students)
     else:
         show_resources()
