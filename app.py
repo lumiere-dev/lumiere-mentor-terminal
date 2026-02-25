@@ -100,7 +100,7 @@ STUDENT_FIELDS = {
     "mentor_confirmation": "Mentor Confirmation",
     "background_shared": "OB: Mentor Background Shared",
     "expected_meetings": "Number of Expected Meetings - Student/Mentor",
-    "completed_meetings": "[Current + Archived] No. of Meetings Completed",
+    "completed_meetings": "Total No. of Meetings Completed (Accounted for 1 No Show)",
     "notes_summary": "Mentor-Student Notes Summary",
     "hours_recorded": "[Current + Archived] No. of Hours Recorded",
     "foundation_student": "Foundation Student",
