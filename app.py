@@ -1317,26 +1317,29 @@ def show_student_background(student):
     st.markdown(details_html, unsafe_allow_html=True)
 
     # Section 3: Coursework, Notes & Reason for Interest
-    st.markdown("#### Background & Notes")
-    coursework = student.get("previous_coursework") or "Not specified"
-    notes = student.get("interview_notes") or "Not specified"
-    reason = student.get("reason_for_interest") or "Not specified"
-    st.markdown(
-        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
-        '<div style="margin-bottom:1.25rem;">'
-        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Reason for interest in research areas</div>'
-        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{reason}</div>'
-        '</div>'
-        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;margin-bottom:1.25rem;">'
-        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Student has completed coursework in</div>'
-        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{coursework}</div>'
-        '</div>'
-        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;">'
-        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Notes from our team for this student</div>'
-        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{notes}</div>'
-        '</div></div>',
-        unsafe_allow_html=True
-    )
+    bg_items = [
+        ("Reason for interest in research areas", student.get("reason_for_interest")),
+        ("Student has completed coursework in", student.get("previous_coursework")),
+        ("Notes from our team for this student", student.get("interview_notes")),
+    ]
+    bg_items = [(label, val) for label, val in bg_items if val and val.strip()]
+    if bg_items:
+        st.markdown("#### Background & Notes")
+        inner = ""
+        for i, (label, val) in enumerate(bg_items):
+            border = "border-top:1px solid #F1F5F9;padding-top:1.25rem;" if i > 0 else ""
+            bottom = "margin-bottom:1.25rem;" if i < len(bg_items) - 1 else ""
+            inner += (
+                f'<div style="{border}{bottom}">'
+                f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">{label}</div>'
+                f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{val}</div>'
+                f'</div>'
+            )
+        st.markdown(
+            '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+            + inner + '</div>',
+            unsafe_allow_html=True
+        )
 
 def show_prospective_student_background(student):
     city = student["city"] or ""
@@ -1367,26 +1370,29 @@ def show_prospective_student_background(student):
     )
 
     # Background & Notes
-    st.markdown("#### Background & Notes")
-    coursework = student.get("previous_coursework") or "Not specified"
-    notes = student.get("interview_notes") or "Not specified"
-    reason = student.get("reason_for_interest") or "Not specified"
-    st.markdown(
-        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
-        '<div style="margin-bottom:1.25rem;">'
-        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Reason for interest in research areas</div>'
-        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{reason}</div>'
-        '</div>'
-        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;margin-bottom:1.25rem;">'
-        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Student has completed coursework in</div>'
-        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{coursework}</div>'
-        '</div>'
-        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;">'
-        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Notes from our team for this student</div>'
-        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{notes}</div>'
-        '</div></div>',
-        unsafe_allow_html=True
-    )
+    bg_items = [
+        ("Reason for interest in research areas", student.get("reason_for_interest")),
+        ("Student has completed coursework in", student.get("previous_coursework")),
+        ("Notes from our team for this student", student.get("interview_notes")),
+    ]
+    bg_items = [(label, val) for label, val in bg_items if val and val.strip()]
+    if bg_items:
+        st.markdown("#### Background & Notes")
+        inner = ""
+        for i, (label, val) in enumerate(bg_items):
+            border = "border-top:1px solid #F1F5F9;padding-top:1.25rem;" if i > 0 else ""
+            bottom = "margin-bottom:1.25rem;" if i < len(bg_items) - 1 else ""
+            inner += (
+                f'<div style="{border}{bottom}">'
+                f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">{label}</div>'
+                f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{val}</div>'
+                f'</div>'
+            )
+        st.markdown(
+            '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+            + inner + '</div>',
+            unsafe_allow_html=True
+        )
 
 def show_student_deadlines_and_submissions(student):
     st.markdown("### Student Deadlines & Submissions")
