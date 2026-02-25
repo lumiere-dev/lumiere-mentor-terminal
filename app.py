@@ -122,7 +122,10 @@ STUDENT_FIELDS = {
     "publication_specialist_name": "Publication Specialist (Text)",
     "publication_specialist_email": "Publication Specialist Email",
     "publication_marker": "publication marker",
-    "publication_status": "PS: Latest Publication Outcome - Latest"
+    "publication_status": "PS: Latest Publication Outcome - Latest",
+    "mentor_hourly_rate": "FN: Mentor Hourly Base Rate",
+    "evaluation_form_link": "Evaluation form link",
+    "revised_paper_upload": "Revised Final Paper upload (from Mentor-Student Progress Up Date)"
 }
 
 DEADLINE_FIELDS = {
@@ -362,7 +365,10 @@ def get_students_for_mentor(mentor_name):
                 "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
                 "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
                 "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
-                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], ""))
+                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
+                "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
+                "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
+                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], [])
             })
         return students
     except Exception as e:
@@ -436,7 +442,10 @@ def get_prospective_students(mentor_email):
                 "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
                 "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
                 "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
-                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], ""))
+                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
+                "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
+                "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
+                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], [])
             })
         return students
     except Exception as e:
@@ -1138,7 +1147,7 @@ def show_confirmed_students(students):
             else:
                 st.markdown("---")
 
-            tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions", "💳 Payment Information"])
             with tab1:
                 show_student_background(selected)
             with tab2:
@@ -1147,6 +1156,8 @@ def show_confirmed_students(students):
                 show_student_deadlines_and_submissions(selected)
             with tab4:
                 show_mentor_submissions(selected)
+            with tab5:
+                show_payment_information(selected)
             return
 
     # Filter by student name
@@ -1410,6 +1421,69 @@ def show_prospective_student_background(student):
             + inner + '</div>',
             unsafe_allow_html=True
         )
+
+def show_payment_information(student):
+    st.markdown("### Payment Information")
+
+    def fb(label, value):
+        v = value or "Not specified"
+        return (f'<div style="margin-bottom:0.1rem;">'
+                f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>'
+                f'<div style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{v}</div>'
+                f'</div>')
+
+    # Mentor Hourly Base Rate
+    rate = student.get("mentor_hourly_rate")
+    rate_display = f"${rate:g}/hr" if rate is not None and rate != "" else "Not specified"
+
+    # Evaluation form link
+    eval_link = student.get("evaluation_form_link") or ""
+    eval_display = (
+        f'<a href="{eval_link}" target="_blank" style="color:#BE1E2D;font-weight:500;font-size:0.95rem;">{eval_link}</a>'
+        if eval_link else
+        '<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">Not specified</span>'
+    )
+
+    # Revised Final Paper upload — may be a list of attachment objects or a plain value
+    upload_raw = student.get("revised_paper_upload")
+    if isinstance(upload_raw, list) and upload_raw:
+        upload_links = []
+        for item in upload_raw:
+            if isinstance(item, dict):
+                url = item.get("url", "")
+                name = item.get("filename", url)
+                upload_links.append(f'<a href="{url}" target="_blank" style="color:#BE1E2D;font-weight:500;">{name}</a>')
+            else:
+                upload_links.append(f'<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{item}</span>')
+        upload_display = ", ".join(upload_links)
+    elif upload_raw:
+        upload_display = f'<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{upload_raw}</span>'
+    else:
+        upload_display = '<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">Not specified</span>'
+
+    # Publication marker & status
+    pub_marker = student.get("publication_marker") or "No"
+    pub_status = student.get("publication_status") or ""
+
+    def field_html(label, content_html):
+        return (
+            f'<div style="margin-bottom:0.1rem;">'
+            f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>'
+            f'{content_html}'
+            f'</div>'
+        )
+
+    st.markdown(
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">'
+        + fb("Mentor Hourly Base Rate", rate_display)
+        + field_html("Evaluation Form Link", eval_display)
+        + field_html("Revised Final Paper Upload", upload_display)
+        + fb("Publication Marker", pub_marker)
+        + (fb("Publication Status", pub_status) if pub_status else "")
+        + '</div></div>',
+        unsafe_allow_html=True
+    )
 
 def show_student_deadlines_and_submissions(student):
     st.markdown("### Student Deadlines & Submissions")
