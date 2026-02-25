@@ -1481,12 +1481,12 @@ def show_payment_information(student):
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">'
         + fb("Hourly Base Rate", rate_display)
-        + fb("Payment Status", student.get("mentor_payment_status") or "Not specified")
         + yes_no_badge("Have you submitted the evaluation & feedback for this student?", eval_submitted)
         + yes_no_badge("Has the student submitted the revised final paper?", paper_submitted)
-        + fb("1st Payment Date", format_date(student.get("payment_date_1", "")))
-        + fb("2nd Payment Date", format_date(student.get("payment_date_2", "")))
-        + fb("3rd Payment Date", format_date(student.get("payment_date_3", "")))
+        + fb("Payment Status", student.get("mentor_payment_status") or "Not specified")
+        + (fb("1st Payment Date", format_date(student.get("payment_date_1", ""))) if student.get("payment_date_1") else "")
+        + (fb("2nd Payment Date", format_date(student.get("payment_date_2", ""))) if student.get("payment_date_2") else "")
+        + (fb("3rd Payment Date", format_date(student.get("payment_date_3", ""))) if student.get("payment_date_3") else "")
         + (fb("What's the student's publication status?", pub_status) if includes_publication else "")
         + '</div></div>',
         unsafe_allow_html=True
