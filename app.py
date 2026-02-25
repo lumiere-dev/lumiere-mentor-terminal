@@ -372,7 +372,7 @@ def get_prospective_students(mentor_email):
             f"AND("
             f"FIND('{mentor_email}', ARRAYJOIN({{Mentor Email}})), "
             f"{{Written Confirmation/Participation Decision}} != \"No\", "
-            f"{{Upcoming Cohort (Cohort Table)}} = TRUE()"
+            f"FIND(\"True\", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}}))"
             f")"
         )
         records = tables["students"].all(formula=formula)
