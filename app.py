@@ -317,17 +317,26 @@ def get_mentor_by_email(email):
     return None
 
 @st.cache_data(ttl=300)
-def get_students_for_mentor(mentor_name):
-    """Get all students assigned to a mentor"""
+def get_students_for_mentor(mentor_email):
+    """Get confirmed students for a mentor, filtered by Student Confirmed & Launched,
+    then matched by mentor email in Python (since Mentor Email is a lookup array field)."""
     tables = get_tables()
     try:
-        # Use FIND to search for mentor name in the linked field
-        formula = f"FIND('{mentor_name}', ARRAYJOIN({{Mentor Name}}))"
+        formula = '{Student Confirmed & Launched} = "Yes"'
         records = tables["students"].all(formula=formula)
 
         students = []
         for record in records:
             fields = record["fields"]
+
+            # Mentor Email is a lookup array — check if our email is in it
+            mentor_emails = fields.get("Mentor Email", [])
+            if isinstance(mentor_emails, list):
+                matched = any(e.strip().lower() == mentor_email.strip().lower() for e in mentor_emails)
+            else:
+                matched = str(mentor_emails).strip().lower() == mentor_email.strip().lower()
+            if not matched:
+                continue
 
             # Helper to unwrap Airtable lookup fields (returned as arrays)
             def unwrap(val, default=""):
@@ -920,7 +929,7 @@ def show_dashboard():
         prospective = get_prospective_students(st.session_state.mentor_email)
         show_assigned_students(prospective)
     elif view == "✅ Confirmed Students":
-        students = get_students_for_mentor(st.session_state.mentor_name)
+        students = get_students_for_mentor(st.session_state.mentor_email)
         show_confirmed_students(students)
     else:
         show_resources()
@@ -1122,8 +1131,7 @@ def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">These are the students you\'re actively working with or have worked with in the past. Click into any student to view their background, track deadlines and submissions, and review meeting notes.</p>', unsafe_allow_html=True)
 
-    # Filter to confirmed students only
-    confirmed_students = [s for s in students if s["mentor_confirmation"] == "Yes"]
+    confirmed_students = students
 
     if not confirmed_students:
         st.info("No confirmed students yet. Students will appear here once they confirm the mentor match.")
