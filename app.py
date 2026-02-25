@@ -995,7 +995,7 @@ def show_assigned_students(students):
                 unsafe_allow_html=True
             )
 
-            show_student_background(selected)
+            show_prospective_student_background(selected)
             return
 
         # Student not found in list (e.g. after data refresh), reset
@@ -1317,6 +1317,56 @@ def show_student_background(student):
     st.markdown(details_html, unsafe_allow_html=True)
 
     # Section 3: Coursework, Notes & Reason for Interest
+    st.markdown("#### Background & Notes")
+    coursework = student.get("previous_coursework") or "Not specified"
+    notes = student.get("interview_notes") or "Not specified"
+    reason = student.get("reason_for_interest") or "Not specified"
+    st.markdown(
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+        '<div style="margin-bottom:1.25rem;">'
+        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Reason for interest in research areas</div>'
+        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{reason}</div>'
+        '</div>'
+        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;margin-bottom:1.25rem;">'
+        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Student has completed coursework in</div>'
+        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{coursework}</div>'
+        '</div>'
+        '<div style="border-top:1px solid #F1F5F9;padding-top:1.25rem;">'
+        '<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Notes from our team for this student</div>'
+        f'<div style="font-size:0.92rem;color:#1A1A2E;line-height:1.6;">{notes}</div>'
+        '</div></div>',
+        unsafe_allow_html=True
+    )
+
+def show_prospective_student_background(student):
+    city = student["city"] or ""
+    country = student.get("country") or ""
+    location = ", ".join(filter(None, [city, country])) or "Not specified"
+
+    def fb(label, value):
+        v = value or "Not specified"
+        return (f'<div style="margin-bottom:0.1rem;">'
+                f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>'
+                f'<div style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{v}</div>'
+                f'</div>')
+
+    grad_year = str(student["graduation_year"]) if student["graduation_year"] else None
+
+    # Student Overview (no Status in Program)
+    st.markdown("#### Student Overview")
+    st.markdown(
+        '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;">'
+        + fb("Preferred Name", student.get("preferred_name"))
+        + fb("Location", location)
+        + fb("Graduation Year", grad_year)
+        + fb("Current Grade in School", student.get("current_grade"))
+        + fb("Research Area", student.get("research_area"))
+        + '</div></div>',
+        unsafe_allow_html=True
+    )
+
+    # Background & Notes
     st.markdown("#### Background & Notes")
     coursework = student.get("previous_coursework") or "Not specified"
     notes = student.get("interview_notes") or "Not specified"
