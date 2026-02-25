@@ -125,7 +125,8 @@ STUDENT_FIELDS = {
     "publication_status": "PS: Latest Publication Outcome - Latest",
     "mentor_hourly_rate": "FN: Mentor Hourly Base Rate",
     "evaluation_form_link": "Evaluation form link",
-    "revised_paper_upload": "Revised Final Paper upload (from Mentor-Student Progress Up Date)"
+    "revised_paper_upload": "Revised Final Paper upload (from Mentor-Student Progress Up Date)",
+    "mentor_payment_status": "FN: Mentor Payment Status (Total)"
 }
 
 DEADLINE_FIELDS = {
@@ -368,7 +369,8 @@ def get_students_for_mentor(mentor_name):
                 "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
                 "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
                 "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
-                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], [])
+                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
+                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], ""))
             })
         return students
     except Exception as e:
@@ -445,7 +447,8 @@ def get_prospective_students(mentor_email):
                 "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
                 "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
                 "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
-                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], [])
+                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
+                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], ""))
             })
         return students
     except Exception as e:
@@ -1469,6 +1472,7 @@ def show_payment_information(student):
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">'
         + fb("Hourly Base Rate", rate_display)
+        + fb("Payment Status", student.get("mentor_payment_status") or "Not specified")
         + yes_no_badge("Have you submitted the evaluation & feedback for this student?", eval_submitted)
         + yes_no_badge("Has the student submitted the revised final paper?", paper_submitted)
         + (fb("What's the student's publication status?", pub_status) if includes_publication else "")
