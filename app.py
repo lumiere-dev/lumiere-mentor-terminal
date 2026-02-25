@@ -126,7 +126,10 @@ STUDENT_FIELDS = {
     "mentor_hourly_rate": "FN: Mentor Hourly Base Rate",
     "evaluation_form_link": "Evaluation form link",
     "revised_paper_upload": "Revised Final Paper upload (from Mentor-Student Progress Up Date)",
-    "mentor_payment_status": "FN: Mentor Payment Status (Total)"
+    "mentor_payment_status": "FN: Mentor Payment Status (Total)",
+    "payment_date_1": "FN: 1st Payment date to Mentor",
+    "payment_date_2": "FN: 2nd Payment date to Mentor",
+    "payment_date_3": "FN: 3rd Pay Date"
 }
 
 DEADLINE_FIELDS = {
@@ -370,7 +373,10 @@ def get_students_for_mentor(mentor_name):
                 "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
                 "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
                 "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
-                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], ""))
+                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
+                "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
+                "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
+                "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
             })
         return students
     except Exception as e:
@@ -448,7 +454,10 @@ def get_prospective_students(mentor_email):
                 "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
                 "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
                 "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
-                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], ""))
+                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
+                "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
+                "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
+                "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
             })
         return students
     except Exception as e:
@@ -1475,6 +1484,9 @@ def show_payment_information(student):
         + fb("Payment Status", student.get("mentor_payment_status") or "Not specified")
         + yes_no_badge("Have you submitted the evaluation & feedback for this student?", eval_submitted)
         + yes_no_badge("Has the student submitted the revised final paper?", paper_submitted)
+        + fb("1st Payment Date", format_date(student.get("payment_date_1", "")))
+        + fb("2nd Payment Date", format_date(student.get("payment_date_2", "")))
+        + fb("3rd Payment Date", format_date(student.get("payment_date_3", "")))
         + (fb("What's the student's publication status?", pub_status) if includes_publication else "")
         + '</div></div>',
         unsafe_allow_html=True
