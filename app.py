@@ -120,7 +120,9 @@ STUDENT_FIELDS = {
     "writing_coach_name": "Writing Coach Name (Text)",
     "writing_coach_email": "Writing Coach Email",
     "publication_specialist_name": "Publication Specialist (Text)",
-    "publication_specialist_email": "Publication Specialist Email"
+    "publication_specialist_email": "Publication Specialist Email",
+    "publication_marker": "publication marker",
+    "publication_status": "PS: Latest Publication Outcome - Latest"
 }
 
 DEADLINE_FIELDS = {
@@ -358,7 +360,9 @@ def get_students_for_mentor(mentor_name):
                 "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
                 "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
                 "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
-                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], ""))
+                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
+                "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
+                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], ""))
             })
         return students
     except Exception as e:
@@ -420,7 +424,9 @@ def get_prospective_students(mentor_email):
                 "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
                 "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
                 "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
-                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], ""))
+                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
+                "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
+                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], ""))
             })
         return students
     except Exception as e:
@@ -1280,6 +1286,7 @@ def show_student_background(student):
         + fb("Current Grade in School", student.get("current_grade"))
         + fb("Research Area", student.get("research_area"))
         + fb("Status in Program", student.get("student_status"))
+        + (fb("Publication Status", student.get("publication_status")) if student.get("publication_marker", "").strip().lower() == "yes" else "")
         + '</div></div>',
         unsafe_allow_html=True
     )
