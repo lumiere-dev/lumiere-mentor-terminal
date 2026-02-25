@@ -286,6 +286,8 @@ if "team_unlocked" not in st.session_state:
     st.session_state.team_unlocked = False
 if "selected_student_name" not in st.session_state:
     st.session_state.selected_student_name = None
+if "selected_prospective_student" not in st.session_state:
+    st.session_state.selected_prospective_student = None
 
 # Helper functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -965,6 +967,40 @@ def show_assigned_students(students):
 
     students = sorted(students, key=due_date_sort_key)
 
+    # If a prospective student is selected, show their profile
+    if st.session_state.selected_prospective_student:
+        selected = next(
+            (s for s in students if s["name"] == st.session_state.selected_prospective_student),
+            None
+        )
+        if selected:
+            if st.button("← Back to Student List"):
+                st.session_state.selected_prospective_student = None
+                st.rerun()
+
+            st.markdown(f"## {selected['name']}")
+            st.markdown("---")
+
+            # Confirmation form banner
+            st.markdown(
+                '<a href="https://airtable.com/appK9HemdsQBzVefU/shrRxeL631pDNaAy5" target="_blank" style="text-decoration:none;">'
+                '<div style="background:#ECFDF5;border:1px solid #6EE7B7;border-radius:10px;padding:1rem 1.25rem;'
+                'margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;">'
+                '<div>'
+                '<div style="font-size:0.9rem;font-weight:700;color:#065F46;margin-bottom:0.2rem;">✅ Ready to work with this student?</div>'
+                '<div style="font-size:0.85rem;color:#047857;">Fill out the confirmation form to let us know you\'d like to move forward.</div>'
+                '</div>'
+                '<div style="font-size:0.85rem;font-weight:700;color:#065F46;white-space:nowrap;margin-left:1rem;">Confirm Interest →</div>'
+                '</div></a>',
+                unsafe_allow_html=True
+            )
+
+            show_student_background(selected)
+            return
+
+        # Student not found in list (e.g. after data refresh), reset
+        st.session_state.selected_prospective_student = None
+
     st.markdown(f"**Your Prospective Students** — {len(students)} student{'s' if len(students) != 1 else ''}")
 
     # Student filter
@@ -987,55 +1023,62 @@ def show_assigned_students(students):
         tuition = normalize_tuition_paid(student.get("tuition_paid", "") or "—")
         white_label = student.get("white_label", "") or "—"
 
-        st.markdown(
-            f"""
-            <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
-                        margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
-                        border-left:4px solid #BE1E2D;">
-                <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:1rem;">
-                    {student["name"]}
+        card_col, btn_col = st.columns([6, 1])
+        with card_col:
+            st.markdown(
+                f"""
+                <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                            margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                            border-left:4px solid #BE1E2D;">
+                    <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:1rem;">
+                        {student["name"]}
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 2rem;">
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                                Have you indicated interest to work with this student?
+                            </div>
+                            {status_badge(confirmation)}
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                                Has your bio been shared with the student?
+                            </div>
+                            {status_badge(shared)}
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                                Is this a Foundation student?
+                            </div>
+                            {status_badge(foundation)}
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                                Has the student confirmed this match?
+                            </div>
+                            {status_badge(tuition)}
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
+                                Is this a white label student?
+                            </div>
+                            {status_badge(white_label)}
+                        </div>
+                    </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem 2rem;">
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Have you indicated interest to work with this student?
-                        </div>
-                        {status_badge(confirmation)}
-                    </div>
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Has your bio been shared with the student?
-                        </div>
-                        {status_badge(shared)}
-                    </div>
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Is this a Foundation student?
-                        </div>
-                        {status_badge(foundation)}
-                    </div>
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Has the student confirmed this match?
-                        </div>
-                        {status_badge(tuition)}
-                    </div>
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;">
-                            Is this a white label student?
-                        </div>
-                        {status_badge(white_label)}
-                    </div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                """,
+                unsafe_allow_html=True
+            )
+        with btn_col:
+            st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+            if st.button("View →", key=f"prospective_{student['id']}", use_container_width=True):
+                st.session_state.selected_prospective_student = student["name"]
+                st.rerun()
 
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
