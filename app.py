@@ -1432,54 +1432,44 @@ def show_payment_information(student):
                 f'<div style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{v}</div>'
                 f'</div>')
 
-    # Mentor Hourly Base Rate
-    rate = student.get("mentor_hourly_rate")
-    rate_display = f"${rate:g}/hr" if rate is not None and rate != "" else "Not specified"
+    def yes_no_badge(label, is_yes):
+        if is_yes:
+            badge = '<span style="background:#ECFDF5;color:#065F46;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.8rem;font-weight:600;">✓ Yes</span>'
+        else:
+            badge = '<span style="background:#FEF2F2;color:#991B1B;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.8rem;font-weight:600;">✗ No</span>'
+        return (f'<div style="margin-bottom:0.1rem;">'
+                f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>'
+                f'{badge}'
+                f'</div>')
 
-    # Evaluation form link
+    # Mentor Hourly Base Rate — safely handle list/string/number
+    rate_raw = student.get("mentor_hourly_rate")
+    if isinstance(rate_raw, list):
+        rate_raw = rate_raw[0] if rate_raw else None
+    try:
+        rate_display = f"${float(rate_raw):g}/hr" if rate_raw is not None and rate_raw != "" else "Not specified"
+    except (TypeError, ValueError):
+        rate_display = str(rate_raw) if rate_raw else "Not specified"
+
+    # Evaluation & Feedback Submitted? — Yes if link field is non-empty
     eval_link = student.get("evaluation_form_link") or ""
-    eval_display = (
-        f'<a href="{eval_link}" target="_blank" style="color:#BE1E2D;font-weight:500;font-size:0.95rem;">{eval_link}</a>'
-        if eval_link else
-        '<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">Not specified</span>'
-    )
+    eval_submitted = bool(eval_link.strip()) if isinstance(eval_link, str) else bool(eval_link)
 
-    # Revised Final Paper upload — may be a list of attachment objects or a plain value
+    # Revised Final Paper Submitted? — Yes if attachment field has content
     upload_raw = student.get("revised_paper_upload")
-    if isinstance(upload_raw, list) and upload_raw:
-        upload_links = []
-        for item in upload_raw:
-            if isinstance(item, dict):
-                url = item.get("url", "")
-                name = item.get("filename", url)
-                upload_links.append(f'<a href="{url}" target="_blank" style="color:#BE1E2D;font-weight:500;">{name}</a>')
-            else:
-                upload_links.append(f'<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{item}</span>')
-        upload_display = ", ".join(upload_links)
-    elif upload_raw:
-        upload_display = f'<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">{upload_raw}</span>'
-    else:
-        upload_display = '<span style="font-size:0.95rem;color:#1A1A2E;font-weight:500;">Not specified</span>'
+    paper_submitted = bool(upload_raw) if not isinstance(upload_raw, list) else len(upload_raw) > 0
 
     # Publication marker & status
     pub_marker = student.get("publication_marker") or "No"
     pub_status = student.get("publication_status") or ""
 
-    def field_html(label, content_html):
-        return (
-            f'<div style="margin-bottom:0.1rem;">'
-            f'<div style="font-size:0.72rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">{label}</div>'
-            f'{content_html}'
-            f'</div>'
-        )
-
     st.markdown(
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">'
         + fb("Mentor Hourly Base Rate", rate_display)
-        + field_html("Evaluation Form Link", eval_display)
-        + field_html("Revised Final Paper Upload", upload_display)
         + fb("Publication Marker", pub_marker)
+        + yes_no_badge("Evaluation & Feedback Submitted?", eval_submitted)
+        + yes_no_badge("Revised Final Paper Submitted?", paper_submitted)
         + (fb("Publication Status", pub_status) if pub_status else "")
         + '</div></div>',
         unsafe_allow_html=True
