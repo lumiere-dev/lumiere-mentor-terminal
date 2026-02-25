@@ -370,13 +370,13 @@ def get_students_for_mentor(mentor_name):
         return []
 
 @st.cache_data(ttl=300)
-def get_prospective_students(mentor_email):
-    """Get prospective students for a mentor filtered by email, participation decision, and upcoming cohort"""
+def get_prospective_students(mentor_name):
+    """Get prospective students for a mentor filtered by name, participation decision, and upcoming cohort"""
     tables = get_tables()
     try:
         formula = (
             f"AND("
-            f"FIND('{mentor_email}', ARRAYJOIN({{Mentor Email}})), "
+            f"FIND('{mentor_name}', ARRAYJOIN({{Mentor Name}})), "
             f"{{Written Confirmation/Participation Decision}} != \"No\", "
             f"FIND(\"True\", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}}))"
             f")"
@@ -886,7 +886,7 @@ def show_dashboard():
         )
 
     if view == "📋 Prospective Students":
-        prospective = get_prospective_students(st.session_state.mentor_email)
+        prospective = get_prospective_students(st.session_state.mentor_name)
         show_assigned_students(prospective)
     elif view == "✅ Confirmed Students":
         students = get_students_for_mentor(st.session_state.mentor_name)
@@ -955,7 +955,7 @@ def show_resources():
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.25rem 1.5rem;'
         'box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1rem;">'
         '<div style="font-size:0.85rem;color:#64748B;margin-bottom:0.75rem;">Base your syllabus on one of the templates below depending on your student\'s program.</div>'
-        + link_item("Syllabus Outline — Individual & Premium Research Program", "https://docs.google.com/document/d/10dxpWF1-LiJz77to7gC7HEf90me1MxuQGYek5n6UKqs/edit")
+        + link_item("Syllabus Outline — Individual & Premium Research Program", "https://docs.google.com/document/d/1g-vjJRawgWTKEpgDoKqPpOs6fUYA0_AG5ytJ0Dvywzo/edit?usp=sharing")
         + link_item("Syllabus Outline — Research Fellowship", "https://docs.google.com/spreadsheets/d/1KE9xVF78F6g0J1LcpyzPLt5vp1he7NRBFUEBc_AucaI/edit#gid=0")
         + link_item("Non-Branded Syllabus — Partner Programs (Individual & Premium)", "https://docs.google.com/document/d/1ZOsMZiBEGlKgvP8tfU1wVtKR3AVhE48K/edit?usp=sharing&ouid=115965191483790562336&rtpof=true&sd=true")
         + '</div>',
