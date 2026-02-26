@@ -307,171 +307,113 @@ def get_mentor_by_email(email):
         records = tables["mentors"].all(formula=f"LOWER({{Email}}) = LOWER('{email}')")
         if records:
             record = records[0]
+            contractor_status = record["fields"].get("Contractor/Volunteer Status", [])
+            if not isinstance(contractor_status, list):
+                contractor_status = [contractor_status]
             return {
                 "id": record["id"],
                 "name": record["fields"].get("Name") or record["fields"].get("Mentor Name", ""),
-                "email": record["fields"].get("Email", "")
+                "email": record["fields"].get("Email", ""),
+                "is_foundation_volunteer": "Foundation Volunteer" in contractor_status
             }
     except Exception as e:
         st.error(f"Error fetching mentor: {e}")
     return None
 
+def _parse_student_record(record):
+    """Parse a raw Airtable student record into a dict. Returns None if parsing fails."""
+    def unwrap(val, default=""):
+        if isinstance(val, list):
+            val = val[0] if val else default
+        val = val if val is not None else default
+        if isinstance(val, str):
+            val = val.strip("[]'\"")
+        return val
+
+    fields = record["fields"]
+    mentor_emails_raw = fields.get("Mentor Email", [])
+    if not isinstance(mentor_emails_raw, list):
+        mentor_emails_raw = [mentor_emails_raw]
+
+    return {
+        "id": record["id"],
+        "_mentor_emails": [e.strip().lower() for e in mentor_emails_raw if e],
+        "name": fields.get(STUDENT_FIELDS["name"], "Unknown"),
+        "research_area": fields.get(STUDENT_FIELDS["research_area"], ""),
+        "city": fields.get(STUDENT_FIELDS["city"], ""),
+        "graduation_year": fields.get(STUDENT_FIELDS["graduation_year"], ""),
+        "mentor_confirmation": fields.get(STUDENT_FIELDS["mentor_confirmation"], ""),
+        "background_shared": fields.get(STUDENT_FIELDS["background_shared"], ""),
+        "expected_meetings": fields.get(STUDENT_FIELDS["expected_meetings"], 0),
+        "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
+        "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
+        "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
+        "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
+        "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
+        "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
+        "program_manager_name": unwrap(fields.get(STUDENT_FIELDS["program_manager_name"], "")),
+        "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
+        "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
+        "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
+        "white_label": unwrap(fields.get(STUDENT_FIELDS["white_label"], "")),
+        "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
+        "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
+        "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
+        "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
+        "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
+        "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
+        "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
+        "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
+        "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
+        "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
+        "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
+        "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
+        "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
+        "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
+        "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
+        "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
+        "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
+        "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
+        "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
+    }
+
 @st.cache_data(ttl=300)
-def get_students_for_mentor(mentor_email):
-    """Get confirmed students for a mentor, filtered by Student Confirmed & Launched,
-    then matched by mentor email in Python (since Mentor Email is a lookup array field)."""
+def _fetch_all_confirmed_students():
+    """Fetch all confirmed & launched students once. Shared across all mentors."""
     tables = get_tables()
     try:
-        formula = '{Student Confirmed & Launched} = "Yes"'
-        records = tables["students"].all(formula=formula)
-
-        students = []
-        for record in records:
-            fields = record["fields"]
-
-            # Mentor Email is a lookup array — check if our email is in it
-            mentor_emails = fields.get("Mentor Email", [])
-            if isinstance(mentor_emails, list):
-                matched = any(e.strip().lower() == mentor_email.strip().lower() for e in mentor_emails)
-            else:
-                matched = str(mentor_emails).strip().lower() == mentor_email.strip().lower()
-            if not matched:
-                continue
-
-            # Helper to unwrap Airtable lookup fields (returned as arrays)
-            def unwrap(val, default=""):
-                if isinstance(val, list):
-                    val = val[0] if val else default
-                val = val if val is not None else default
-                if isinstance(val, str):
-                    val = val.strip("[]'\"")
-                return val
-
-            students.append({
-                "id": record["id"],
-                "name": fields.get(STUDENT_FIELDS["name"], "Unknown"),
-                "research_area": fields.get(STUDENT_FIELDS["research_area"], ""),
-                "city": fields.get(STUDENT_FIELDS["city"], ""),
-                "graduation_year": fields.get(STUDENT_FIELDS["graduation_year"], ""),
-                "mentor_confirmation": fields.get(STUDENT_FIELDS["mentor_confirmation"], ""),
-                "background_shared": fields.get(STUDENT_FIELDS["background_shared"], ""),
-                "expected_meetings": fields.get(STUDENT_FIELDS["expected_meetings"], 0),
-                "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
-                "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
-                "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
-                "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
-                "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
-                "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
-                "program_manager_name": unwrap(fields.get(STUDENT_FIELDS["program_manager_name"], "")),
-                "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
-                "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
-                "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
-                "white_label": unwrap(fields.get(STUDENT_FIELDS["white_label"], "")),
-                "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
-                "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
-                "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
-                "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
-                "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
-                "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
-                "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
-                "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
-                "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
-                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
-                "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
-                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
-                "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
-                "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
-                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
-                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
-                "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
-                "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
-                "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
-            })
-        return students
+        records = tables["students"].all(formula='{Student Confirmed & Launched} = "Yes"')
+        return [_parse_student_record(r) for r in records]
     except Exception as e:
         st.error(f"Error fetching students: {e}")
         return []
 
 @st.cache_data(ttl=300)
-def get_prospective_students(mentor_email):
-    """Get prospective students for a mentor, filtered by participation decision and upcoming cohort,
-    then matched by mentor email in Python (since Mentor Email is a lookup array field)."""
+def _fetch_all_prospective_students():
+    """Fetch all prospective students once. Shared across all mentors."""
     tables = get_tables()
     try:
-        # Only use non-lookup fields in the Airtable formula
         formula = (
-            f"AND("
-            f"{{Written Confirmation/Participation Decision}} != \"No\", "
-            f"FIND(\"True\", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}}))"
-            f")"
+            'AND('
+            '{Written Confirmation/Participation Decision} != "No", '
+            'FIND("True", ARRAYJOIN({Upcoming Cohort (Cohort Table)}))'
+            ')'
         )
         records = tables["students"].all(formula=formula)
-
-        students = []
-        for record in records:
-            fields = record["fields"]
-
-            # Mentor Email is a lookup array — check if our email is in it
-            mentor_emails = fields.get("Mentor Email", [])
-            if isinstance(mentor_emails, list):
-                matched = any(e.strip().lower() == mentor_email.strip().lower() for e in mentor_emails)
-            else:
-                matched = str(mentor_emails).strip().lower() == mentor_email.strip().lower()
-            if not matched:
-                continue
-
-            def unwrap(val, default=""):
-                if isinstance(val, list):
-                    val = val[0] if val else default
-                val = val if val is not None else default
-                if isinstance(val, str):
-                    val = val.strip("[]'\"")
-                return val
-
-            students.append({
-                "id": record["id"],
-                "name": fields.get(STUDENT_FIELDS["name"], "Unknown"),
-                "research_area": fields.get(STUDENT_FIELDS["research_area"], ""),
-                "city": fields.get(STUDENT_FIELDS["city"], ""),
-                "graduation_year": fields.get(STUDENT_FIELDS["graduation_year"], ""),
-                "mentor_confirmation": fields.get(STUDENT_FIELDS["mentor_confirmation"], ""),
-                "background_shared": fields.get(STUDENT_FIELDS["background_shared"], ""),
-                "expected_meetings": fields.get(STUDENT_FIELDS["expected_meetings"], 0),
-                "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
-                "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
-                "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
-                "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
-                "tuition_paid": fields.get(STUDENT_FIELDS["tuition_paid"], ""),
-                "program_manager_email": unwrap(fields.get(STUDENT_FIELDS["program_manager_email"], "")),
-                "program_manager_name": unwrap(fields.get(STUDENT_FIELDS["program_manager_name"], "")),
-                "revised_final_paper_due": unwrap(fields.get(STUDENT_FIELDS["revised_final_paper_due"], "")),
-                "student_no_shows": unwrap(fields.get(STUDENT_FIELDS["student_no_shows"], 0), default=0),
-                "reason_for_interest": unwrap(fields.get(STUDENT_FIELDS["reason_for_interest"], "")),
-                "white_label": unwrap(fields.get(STUDENT_FIELDS["white_label"], "")),
-                "previous_coursework": unwrap(fields.get(STUDENT_FIELDS["previous_coursework"], "")),
-                "interview_notes": unwrap(fields.get(STUDENT_FIELDS["interview_notes"], "")),
-                "preferred_name": fields.get(STUDENT_FIELDS["preferred_name"], ""),
-                "student_status": fields.get(STUDENT_FIELDS["student_status"], ""),
-                "current_grade": fields.get(STUDENT_FIELDS["current_grade"], ""),
-                "country": unwrap(fields.get(STUDENT_FIELDS["country"], "")),
-                "writing_coach_name": fields.get(STUDENT_FIELDS["writing_coach_name"], ""),
-                "writing_coach_email": unwrap(fields.get(STUDENT_FIELDS["writing_coach_email"], "")),
-                "publication_specialist_name": fields.get(STUDENT_FIELDS["publication_specialist_name"], ""),
-                "publication_specialist_email": unwrap(fields.get(STUDENT_FIELDS["publication_specialist_email"], "")),
-                "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
-                "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
-                "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
-                "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
-                "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
-                "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
-                "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
-                "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
-                "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
-            })
-        return students
+        return [_parse_student_record(r) for r in records]
     except Exception as e:
         st.error(f"Error fetching prospective students: {e}")
         return []
+
+def get_students_for_mentor(mentor_email):
+    """Return confirmed students for a mentor, filtered from the shared cache."""
+    email_lower = mentor_email.strip().lower()
+    return [s for s in _fetch_all_confirmed_students() if email_lower in s["_mentor_emails"]]
+
+def get_prospective_students(mentor_email):
+    """Return prospective students for a mentor, filtered from the shared cache."""
+    email_lower = mentor_email.strip().lower()
+    return [s for s in _fetch_all_prospective_students() if email_lower in s["_mentor_emails"]]
 
 @st.cache_data(ttl=300)
 def get_deadlines_for_student(student_name):
@@ -707,6 +649,7 @@ def check_magic_link_token():
                 st.session_state.authenticated = True
                 st.session_state.mentor_name = mentor["name"]
                 st.session_state.mentor_email = mentor["email"]
+                st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
                 st.session_state.is_preview = False
                 # Clear the token from URL
                 st.query_params.clear()
@@ -864,6 +807,7 @@ def show_login_page():
                         st.session_state.authenticated = True
                         st.session_state.mentor_name = mentor["name"]
                         st.session_state.mentor_email = mentor["email"]
+                        st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
                         st.session_state.is_preview = True
                         st.rerun()
                     else:
@@ -962,11 +906,17 @@ def show_resources():
     st.markdown("#### Key Actions")
     col1, col2 = st.columns(2)
     with col1:
+        is_foundation_volunteer = st.session_state.get("is_foundation_volunteer", False)
+        guidebook_url = (
+            "https://misty-music-eb4.notion.site/Volunteer-Mentor-Guidebook-26ea0d4fb23a8097b9e3fd34146ba1e3"
+            if is_foundation_volunteer else
+            "https://misty-music-eb4.notion.site/Lumiere-Mentor-Guidebook-2fd9c2704a104f86b97564620aca6874"
+        )
         st.markdown(
             resource_card(
                 "Mentor Guidebook",
                 "Your go-to guide covering mentorship best practices, expectations, and program procedures.",
-                "https://misty-music-eb4.notion.site/Lumiere-Mentor-Guidebook-2fd9c2704a104f86b97564620aca6874"
+                guidebook_url
             ),
             unsafe_allow_html=True
         )
@@ -1167,17 +1117,29 @@ def show_confirmed_students(students):
             else:
                 st.markdown("---")
 
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions", "💳 Payment Information"])
-            with tab1:
-                show_student_background(selected)
-            with tab2:
-                show_mentor_meeting_summary(selected)
-            with tab3:
-                show_student_deadlines_and_submissions(selected)
-            with tab4:
-                show_mentor_submissions(selected)
-            with tab5:
-                show_payment_information(selected)
+            is_foundation_volunteer = st.session_state.get("is_foundation_volunteer", False)
+            if is_foundation_volunteer:
+                tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
+                with tab1:
+                    show_student_background(selected)
+                with tab2:
+                    show_mentor_meeting_summary(selected)
+                with tab3:
+                    show_student_deadlines_and_submissions(selected)
+                with tab4:
+                    show_mentor_submissions(selected)
+            else:
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions", "💳 Payment Information"])
+                with tab1:
+                    show_student_background(selected)
+                with tab2:
+                    show_mentor_meeting_summary(selected)
+                with tab3:
+                    show_student_deadlines_and_submissions(selected)
+                with tab4:
+                    show_mentor_submissions(selected)
+                with tab5:
+                    show_payment_information(selected)
             return
 
     # Filter by student name
@@ -1270,7 +1232,7 @@ def show_mentor_meeting_summary(student):
         completed = student.get("completed_meetings", 0) or 0
         expected = student.get("expected_meetings", 0) or 0
         if expected > 0:
-            st.progress(completed / expected)
+            st.progress(min(completed / expected, 1.0))
             st.caption(f"{completed} of {expected} meetings completed")
         else:
             st.markdown("No meetings scheduled")
