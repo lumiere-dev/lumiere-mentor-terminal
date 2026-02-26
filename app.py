@@ -132,6 +132,10 @@ STUDENT_FIELDS = {
     "payment_date_3": "FN: 3rd Pay Date"
 }
 
+# Only fetch the fields actually used by _parse_student_record.
+# This prevents Airtable from returning every column and dramatically reduces payload size.
+_STUDENT_FETCH_FIELDS = ["Mentor Email"] + list(STUDENT_FIELDS.values())
+
 DEADLINE_FIELDS = {
     "name": "Deadline Name",
     "type": "Deadline Type",
@@ -378,42 +382,41 @@ def _parse_student_record(record):
     }
 
 @st.cache_data(ttl=300)
-def _fetch_all_confirmed_students():
-    """Fetch all confirmed & launched students once. Shared across all mentors."""
+def get_students_for_mentor(mentor_email):
+    """Fetch confirmed students for a specific mentor directly from Airtable."""
     tables = get_tables()
+    email_lower = mentor_email.strip().lower()
     try:
-        records = tables["students"].all(formula='{Student Confirmed & Launched} = "Yes"')
+        formula = (
+            f'AND('
+            f'{{Student Confirmed & Launched}} = "Yes", '
+            f'FIND("{email_lower}", LOWER(ARRAYJOIN({{Mentor Email}}, ",")))'
+            f')'
+        )
+        records = tables["students"].all(formula=formula, fields=_STUDENT_FETCH_FIELDS)
         return [_parse_student_record(r) for r in records]
     except Exception as e:
         st.error(f"Error fetching students: {e}")
         return []
 
 @st.cache_data(ttl=300)
-def _fetch_all_prospective_students():
-    """Fetch all prospective students once. Shared across all mentors."""
+def get_prospective_students(mentor_email):
+    """Fetch prospective students for a specific mentor directly from Airtable."""
     tables = get_tables()
+    email_lower = mentor_email.strip().lower()
     try:
         formula = (
-            'AND('
-            '{Written Confirmation/Participation Decision} != "No", '
-            'FIND("True", ARRAYJOIN({Upcoming Cohort (Cohort Table)}))'
-            ')'
+            f'AND('
+            f'{{Written Confirmation/Participation Decision}} != "No", '
+            f'FIND("True", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}})), '
+            f'FIND("{email_lower}", LOWER(ARRAYJOIN({{Mentor Email}}, ",")))'
+            f')'
         )
-        records = tables["students"].all(formula=formula)
+        records = tables["students"].all(formula=formula, fields=_STUDENT_FETCH_FIELDS)
         return [_parse_student_record(r) for r in records]
     except Exception as e:
         st.error(f"Error fetching prospective students: {e}")
         return []
-
-def get_students_for_mentor(mentor_email):
-    """Return confirmed students for a mentor, filtered from the shared cache."""
-    email_lower = mentor_email.strip().lower()
-    return [s for s in _fetch_all_confirmed_students() if email_lower in s["_mentor_emails"]]
-
-def get_prospective_students(mentor_email):
-    """Return prospective students for a mentor, filtered from the shared cache."""
-    email_lower = mentor_email.strip().lower()
-    return [s for s in _fetch_all_prospective_students() if email_lower in s["_mentor_emails"]]
 
 @st.cache_data(ttl=300)
 def get_deadlines_for_student(student_name):
@@ -452,6 +455,7 @@ def get_deadlines_for_student(student_name):
         st.error(f"Error fetching deadlines: {e}")
         return []
 
+@st.cache_data(ttl=300)
 def get_meeting_notes_for_student(student_name):
     """Get meeting notes from the progress/evaluations table for a student"""
     tables = get_tables()
@@ -474,6 +478,7 @@ def get_meeting_notes_for_student(student_name):
         st.error(f"Error fetching meeting notes: {e}")
         return []
 
+@st.cache_data(ttl=300)
 def get_eval_feedback_for_student(student_name):
     """Get Evaluation & Feedback records from the progress table for a student"""
     tables = get_tables()
