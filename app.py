@@ -132,10 +132,6 @@ STUDENT_FIELDS = {
     "payment_date_3": "FN: 3rd Pay Date"
 }
 
-# Only fetch the fields actually used by _parse_student_record.
-# This prevents Airtable from returning every column and dramatically reduces payload size.
-_STUDENT_FETCH_FIELDS = ["Mentor Email"] + list(STUDENT_FIELDS.values())
-
 DEADLINE_FIELDS = {
     "name": "Deadline Name",
     "type": "Deadline Type",
@@ -393,7 +389,7 @@ def get_students_for_mentor(mentor_email):
             f'FIND("{email_lower}", LOWER(ARRAYJOIN({{Mentor Email}}, ",")))'
             f')'
         )
-        records = tables["students"].all(formula=formula, fields=_STUDENT_FETCH_FIELDS)
+        records = tables["students"].all(formula=formula)
         return [_parse_student_record(r) for r in records]
     except Exception as e:
         st.error(f"Error fetching students: {e}")
@@ -412,7 +408,7 @@ def get_prospective_students(mentor_email):
             f'FIND("{email_lower}", LOWER(ARRAYJOIN({{Mentor Email}}, ",")))'
             f')'
         )
-        records = tables["students"].all(formula=formula, fields=_STUDENT_FETCH_FIELDS)
+        records = tables["students"].all(formula=formula)
         return [_parse_student_record(r) for r in records]
     except Exception as e:
         st.error(f"Error fetching prospective students: {e}")
