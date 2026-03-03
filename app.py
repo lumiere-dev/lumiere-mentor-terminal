@@ -101,6 +101,7 @@ STUDENT_FIELDS = {
     "background_shared": "OB: Mentor Background Shared",
     "expected_meetings": "Number of Expected Meetings - Student/Mentor",
     "completed_meetings": "Total No. of Meetings Completed (Accounted for 1 No Show)",
+    "most_recent_meeting_mentor": "[Current + Archived] Most Recent Meeting Mentor",
     "notes_summary": "Mentor-Student Notes Summary",
     "hours_recorded": "[Current + Archived] No. of Hours Recorded",
     "foundation_student": "Foundation Student",
@@ -346,6 +347,7 @@ def _parse_student_record(record):
         "background_shared": fields.get(STUDENT_FIELDS["background_shared"], ""),
         "expected_meetings": fields.get(STUDENT_FIELDS["expected_meetings"], 0),
         "completed_meetings": fields.get(STUDENT_FIELDS["completed_meetings"], 0),
+        "most_recent_meeting_mentor": unwrap(fields.get(STUDENT_FIELDS["most_recent_meeting_mentor"], "")),
         "notes_summary": fields.get(STUDENT_FIELDS["notes_summary"], ""),
         "hours_recorded": fields.get(STUDENT_FIELDS["hours_recorded"], ""),
         "foundation_student": fields.get(STUDENT_FIELDS["foundation_student"], ""),
@@ -403,6 +405,7 @@ def get_prospective_students(mentor_email):
     try:
         formula = (
             f'AND('
+            f'{{Student Confirmed & Launched}} != "Yes", '
             f'{{Written Confirmation/Participation Decision}} != "No", '
             f'FIND("True", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}})), '
             f'FIND("{email_lower}", LOWER(ARRAYJOIN({{Mentor Email}}, ",")))'
@@ -1226,7 +1229,7 @@ def show_mentor_meeting_summary(student):
         unsafe_allow_html=True
     )
 
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 
     with col_m1:
         st.markdown("**📊 Meetings Completed**")
@@ -1249,6 +1252,10 @@ def show_mentor_meeting_summary(student):
     with col_m4:
         st.markdown("**🚫 Number of Student No Shows**")
         st.markdown(str(student.get("student_no_shows", 0) or 0))
+
+    with col_m5:
+        st.markdown("**🧑‍🏫 Most Recent Meeting Mentor**")
+        st.markdown(student.get("most_recent_meeting_mentor", "") or "—")
 
     st.markdown("---")
     st.markdown("### Your Meeting Notes with the Student")
