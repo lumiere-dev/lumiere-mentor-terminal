@@ -962,7 +962,7 @@ def show_assigned_students(students):
     st.markdown('<p class="sub-header">These are your prospective students for the upcoming cohort, and where they are in the onboarding pipeline. As a reminder, once you\'ve confirmed that you\'d like to work with a student, the student needs to confirm — then we kick off!</p>', unsafe_allow_html=True)
 
     if not students:
-        st.info("No students assigned to you yet.")
+        st.info("You have no prospective students for the upcoming cohort yet!")
         return
 
     students = sorted(students, key=due_date_sort_key)
