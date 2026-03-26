@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta, timezone
 import resend
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-import extra_streamlit_components as stx
+from streamlit_cookies_controller import CookieController
 
 # Page config
 st.set_page_config(
@@ -14,8 +14,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Cookie manager for persistent 30-day sessions
-cookie_manager = stx.CookieManager()
+# Cookie controller for persistent 30-day sessions
+cookie_manager = CookieController()
 
 # Initialize Airtable connection
 @st.cache_resource
@@ -676,7 +676,7 @@ def check_magic_link_token():
                 cookie_manager.set(
                     SESSION_COOKIE,
                     generate_session_token(email),
-                    expires_at=datetime.now() + timedelta(days=30)
+                    max_age=SESSION_MAX_AGE
                 )
                 # Clear the token from URL
                 st.query_params.clear()
@@ -703,7 +703,7 @@ def check_session_cookie():
                 st.rerun()
         else:
             # Cookie is expired or tampered — clear it
-            cookie_manager.delete(SESSION_COOKIE)
+            cookie_manager.remove(SESSION_COOKIE)
 
 # LOGIN PAGE
 def show_login_page():
@@ -909,7 +909,7 @@ def show_dashboard():
             # Clear session cookie if present (won't exist in preview mode)
             try:
                 if cookie_manager.get(SESSION_COOKIE):
-                    cookie_manager.delete(SESSION_COOKIE)
+                    cookie_manager.remove(SESSION_COOKIE)
             except Exception:
                 pass
             st.rerun()
