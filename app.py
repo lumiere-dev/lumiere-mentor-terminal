@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta, timezone
 import resend
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+import extra_streamlit_components as stx
 
 # Page config
 st.set_page_config(
@@ -12,6 +13,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Cookie manager for persistent 30-day sessions
+cookie_manager = stx.CookieManager()
 
 # Initialize Airtable connection
 @st.cache_resource
@@ -45,6 +49,19 @@ def verify_magic_token(token, max_age=3600):
     try:
         email = serializer.loads(token, salt="magic-link", max_age=max_age)
         return email
+    except (SignatureExpired, BadSignature):
+        return None
+
+# Persistent session cookies (30 days)
+SESSION_COOKIE = "mentor_session"
+SESSION_MAX_AGE = 30 * 24 * 3600  # 30 days in seconds
+
+def generate_session_token(email):
+    return get_serializer().dumps(email, salt="session")
+
+def verify_session_token(token):
+    try:
+        return get_serializer().loads(token, salt="session", max_age=SESSION_MAX_AGE)
     except (SignatureExpired, BadSignature):
         return None
 
@@ -655,12 +672,38 @@ def check_magic_link_token():
                 st.session_state.mentor_email = mentor["email"]
                 st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
                 st.session_state.is_preview = False
+                # Set a 30-day session cookie so the mentor stays logged in
+                cookie_manager.set(
+                    SESSION_COOKIE,
+                    generate_session_token(email),
+                    expires_at=datetime.now() + timedelta(days=30)
+                )
                 # Clear the token from URL
                 st.query_params.clear()
                 st.rerun()
         else:
             st.error("This login link has expired or is invalid. Please request a new one.")
             st.query_params.clear()
+
+# Check for a persistent session cookie
+def check_session_cookie():
+    if st.session_state.authenticated:
+        return
+    token = cookie_manager.get(SESSION_COOKIE)
+    if token:
+        email = verify_session_token(token)
+        if email:
+            mentor = get_mentor_by_email(email)
+            if mentor:
+                st.session_state.authenticated = True
+                st.session_state.mentor_name = mentor["name"]
+                st.session_state.mentor_email = mentor["email"]
+                st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
+                st.session_state.is_preview = False
+                st.rerun()
+        else:
+            # Cookie is expired or tampered — clear it
+            cookie_manager.delete(SESSION_COOKIE)
 
 # LOGIN PAGE
 def show_login_page():
@@ -863,6 +906,12 @@ def show_dashboard():
             st.session_state.mentor_name = None
             st.session_state.mentor_email = None
             st.session_state.is_preview = False
+            # Clear session cookie if present (won't exist in preview mode)
+            try:
+                if cookie_manager.get(SESSION_COOKIE):
+                    cookie_manager.delete(SESSION_COOKIE)
+            except Exception:
+                pass
             st.rerun()
 
     # Preview mode banner
@@ -1636,7 +1685,9 @@ def show_mentor_submissions(student):
 
 # Main app logic
 def main():
-    # Check for magic link token first
+    # Restore session from cookie (survives tab close/refresh for 30 days)
+    check_session_cookie()
+    # Then check for a fresh magic link token in the URL
     check_magic_link_token()
 
     if not st.session_state.authenticated:
