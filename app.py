@@ -315,6 +315,8 @@ if "selected_student_name" not in st.session_state:
     st.session_state.selected_student_name = None
 if "selected_prospective_student" not in st.session_state:
     st.session_state.selected_prospective_student = None
+if "cookie_checked" not in st.session_state:
+    st.session_state.cookie_checked = False
 
 # Helper functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -704,6 +706,11 @@ def check_session_cookie():
         else:
             # Cookie is expired or tampered — clear it
             cookie_manager.remove(SESSION_COOKIE)
+    elif not st.session_state.cookie_checked:
+        # Cookie JS component may not have loaded yet on the first run —
+        # trigger one rerun so it has a chance to deliver the value.
+        st.session_state.cookie_checked = True
+        st.rerun()
 
 # LOGIN PAGE
 def show_login_page():
