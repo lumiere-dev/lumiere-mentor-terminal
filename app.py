@@ -671,8 +671,9 @@ def check_magic_link_token():
                 st.session_state.mentor_email = mentor["email"]
                 st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
                 st.session_state.is_preview = False
-                # Set a 30-day session cookie so the mentor stays logged in
-                cookie_manager.set(SESSION_COOKIE, generate_session_token(email), max_age=timedelta(days=30))
+                # Defer cookie write to the next run — the JS component
+                # isn't ready to accept set() on the very first page load.
+                st.session_state.pending_session_cookie = email
                 # Clear the token from URL
                 st.query_params.clear()
                 st.rerun()
@@ -1680,6 +1681,10 @@ def show_mentor_submissions(student):
 
 # Main app logic
 def main():
+    # Write deferred session cookie now that the JS component is ready
+    if "pending_session_cookie" in st.session_state:
+        email = st.session_state.pop("pending_session_cookie")
+        cookie_manager.set(SESSION_COOKIE, generate_session_token(email), max_age=timedelta(days=30))
     # Restore session from cookie (survives tab close/refresh for 30 days)
     check_session_cookie()
     # Then check for a fresh magic link token in the URL
