@@ -55,8 +55,9 @@ def verify_magic_token(token, max_age=3600):
 # Persistent session cookies (30 days)
 SESSION_COOKIE = "mentor_session"
 
-def generate_session_token(email):
-    return get_serializer().dumps(email, salt="session")
+def generate_session_token(mentor):
+    """Sign a dict of mentor data so cookie restore needs no Airtable call."""
+    return get_serializer().dumps(mentor, salt="session")
 
 def verify_session_token(token):
     try:
@@ -671,9 +672,13 @@ def check_magic_link_token():
                 st.session_state.mentor_email = mentor["email"]
                 st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
                 st.session_state.is_preview = False
-                # Defer cookie write to the next run — the JS component
-                # isn't ready to accept set() on the very first page load.
-                st.session_state.pending_session_cookie = email
+                # Defer cookie write to next run — JS component not ready on first load.
+                # Store full mentor data so restore needs no Airtable call.
+                st.session_state.pending_session_cookie = {
+                    "email": mentor["email"],
+                    "name": mentor["name"],
+                    "is_foundation_volunteer": mentor.get("is_foundation_volunteer", False),
+                }
                 # Clear the token from URL
                 st.query_params.clear()
                 st.rerun()
@@ -687,16 +692,14 @@ def check_session_cookie():
         return
     token = cookie_manager.get(SESSION_COOKIE)
     if token:
-        email = verify_session_token(token)
-        if email:
-            mentor = get_mentor_by_email(email)
-            if mentor:
-                st.session_state.authenticated = True
-                st.session_state.mentor_name = mentor["name"]
-                st.session_state.mentor_email = mentor["email"]
-                st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
-                st.session_state.is_preview = False
-                st.rerun()
+        mentor = verify_session_token(token)
+        if mentor:
+            st.session_state.authenticated = True
+            st.session_state.mentor_name = mentor["name"]
+            st.session_state.mentor_email = mentor["email"]
+            st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
+            st.session_state.is_preview = False
+            st.rerun()
         else:
             # Cookie is expired or tampered — clear it
             cookie_manager.remove(SESSION_COOKIE)
