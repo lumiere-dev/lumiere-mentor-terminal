@@ -1684,7 +1684,7 @@ def main():
     # Write deferred session cookie now that the JS component is ready
     if "pending_session_cookie" in st.session_state:
         try:
-            cookie_manager.set(SESSION_COOKIE, generate_session_token(st.session_state.pending_session_cookie), max_age=timedelta(days=30))
+            cookie_manager.set(SESSION_COOKIE, generate_session_token(st.session_state.pending_session_cookie), max_age=30 * 24 * 3600)
             del st.session_state.pending_session_cookie
         except Exception:
             pass  # Component not ready yet — retry on next run
