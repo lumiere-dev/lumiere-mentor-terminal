@@ -316,7 +316,7 @@ if "selected_prospective_student" not in st.session_state:
     st.session_state.selected_prospective_student = None
 
 # Helper functions
-@st.cache_data(ttl=300)  # Cache for 5 minutes
+@st.cache_data(ttl=3600)  # Cache for 5 minutes
 def get_mentor_by_email(email):
     """Find mentor by email in Mentor Table"""
     tables = get_tables()
@@ -395,7 +395,7 @@ def _parse_student_record(record):
         "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
     }
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)
 def get_students_for_mentor(mentor_email):
     """Fetch confirmed students for a specific mentor directly from Airtable."""
     tables = get_tables()
@@ -413,7 +413,7 @@ def get_students_for_mentor(mentor_email):
         st.error(f"Error fetching students: {e}")
         return []
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)
 def get_prospective_students(mentor_email):
     """Fetch prospective students for a specific mentor directly from Airtable."""
     tables = get_tables()
@@ -433,7 +433,7 @@ def get_prospective_students(mentor_email):
         st.error(f"Error fetching prospective students: {e}")
         return []
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)
 def get_deadlines_for_student(student_name):
     """Get all deadlines for a specific student"""
     tables = get_tables()
@@ -470,7 +470,7 @@ def get_deadlines_for_student(student_name):
         st.error(f"Error fetching deadlines: {e}")
         return []
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)
 def get_meeting_notes_for_student(student_name):
     """Get meeting notes from the progress/evaluations table for a student"""
     tables = get_tables()
@@ -493,7 +493,7 @@ def get_meeting_notes_for_student(student_name):
         st.error(f"Error fetching meeting notes: {e}")
         return []
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)
 def get_eval_feedback_for_student(student_name):
     """Get Evaluation & Feedback records from the progress table for a student"""
     tables = get_tables()
@@ -1683,8 +1683,11 @@ def show_mentor_submissions(student):
 def main():
     # Write deferred session cookie now that the JS component is ready
     if "pending_session_cookie" in st.session_state:
-        email = st.session_state.pop("pending_session_cookie")
-        cookie_manager.set(SESSION_COOKIE, generate_session_token(email), max_age=timedelta(days=30))
+        try:
+            cookie_manager.set(SESSION_COOKIE, generate_session_token(st.session_state.pending_session_cookie), max_age=timedelta(days=30))
+            del st.session_state.pending_session_cookie
+        except Exception:
+            pass  # Component not ready yet — retry on next run
     # Restore session from cookie (survives tab close/refresh for 30 days)
     check_session_cookie()
     # Then check for a fresh magic link token in the URL
