@@ -54,14 +54,13 @@ def verify_magic_token(token, max_age=3600):
 
 # Persistent session cookies (30 days)
 SESSION_COOKIE = "mentor_session"
-SESSION_MAX_AGE = 30 * 24 * 3600  # 30 days in seconds
 
 def generate_session_token(email):
     return get_serializer().dumps(email, salt="session")
 
 def verify_session_token(token):
     try:
-        return get_serializer().loads(token, salt="session", max_age=SESSION_MAX_AGE)
+        return get_serializer().loads(token, salt="session", max_age=30 * 24 * 3600)
     except (SignatureExpired, BadSignature):
         return None
 
@@ -315,8 +314,6 @@ if "selected_student_name" not in st.session_state:
     st.session_state.selected_student_name = None
 if "selected_prospective_student" not in st.session_state:
     st.session_state.selected_prospective_student = None
-if "cookie_checked" not in st.session_state:
-    st.session_state.cookie_checked = False
 
 # Helper functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -675,11 +672,7 @@ def check_magic_link_token():
                 st.session_state.is_foundation_volunteer = mentor.get("is_foundation_volunteer", False)
                 st.session_state.is_preview = False
                 # Set a 30-day session cookie so the mentor stays logged in
-                cookie_manager.set(
-                    SESSION_COOKIE,
-                    generate_session_token(email),
-                    max_age=SESSION_MAX_AGE
-                )
+                cookie_manager.set(SESSION_COOKIE, generate_session_token(email), max_age=timedelta(days=30))
                 # Clear the token from URL
                 st.query_params.clear()
                 st.rerun()
@@ -706,11 +699,6 @@ def check_session_cookie():
         else:
             # Cookie is expired or tampered — clear it
             cookie_manager.remove(SESSION_COOKIE)
-    elif not st.session_state.cookie_checked:
-        # Cookie JS component may not have loaded yet on the first run —
-        # trigger one rerun so it has a chance to deliver the value.
-        st.session_state.cookie_checked = True
-        st.rerun()
 
 # LOGIN PAGE
 def show_login_page():
