@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 import resend
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from streamlit_cookies_controller import CookieController
+import streamlit_analytics2 as streamlit_analytics
 
 # Page config
 st.set_page_config(
@@ -1702,4 +1703,5 @@ def main():
         show_dashboard()
 
 if __name__ == "__main__":
-    main()
+    with streamlit_analytics.track():
+        main()
