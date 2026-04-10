@@ -484,8 +484,8 @@ def get_meeting_notes_for_student(student_name):
         for record in records:
             fields = record["fields"]
             notes.append({
-                "date": fields.get("Date of meeting", ""),
-                "notes": fields.get("Meeting Notes Between Mentor & Student", "")
+                "date": fields.get("Date of Meeting", ""),
+                "notes": fields.get("Meeting Notes Between Mentor & Student", ""),
             })
 
         notes.sort(key=lambda x: x["date"] or "0000-00-00", reverse=True)
