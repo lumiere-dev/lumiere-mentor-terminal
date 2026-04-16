@@ -1133,15 +1133,16 @@ def show_assigned_students(students):
                 st.rerun()
 
 # VIEW B: CONFIRMED STUDENTS
+# VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">These are the students you\'re actively working with or have worked with in the past.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">These are the students you\'re actively working with or have worked with in the past. Click into any student to view their background, track deadlines and submissions, and review meeting notes.</p>', unsafe_allow_html=True)
 
     if not students:
         st.info("No confirmed students found for this email address in Airtable.")
         return
 
-    # Detail View (if a student is clicked)
+    # --- DETAIL VIEW (If a student is selected) ---
     if "selected_student_name" in st.session_state and st.session_state.selected_student_name:
         selected = next((s for s in students if s["name"] == st.session_state.selected_student_name), None)
         if selected:
@@ -1170,15 +1171,15 @@ def show_confirmed_students(students):
                 with st_tabs[4]: show_payment_information(selected)
             return
 
-    # --- LIST VIEW WITH ROBUST GROUPING ---
-    
-    # We strip and upper-case to ensure "yes" == "Yes"
+    # --- LIST VIEW WITH GROUPING ---
     active_students = []
     past_students = []
 
     for s in students:
-        val = str(s.get("active_cohort", "No")).strip()
-        if val == "Yes":
+        # Check for "Yes" inside the string representation of the lookup field
+        # This handles cases where Airtable returns ['Yes'] or 'Yes'
+        val = str(s.get("active_cohort", "No"))
+        if "Yes" in val:
             active_students.append(s)
         else:
             past_students.append(s)
@@ -1187,13 +1188,10 @@ def show_confirmed_students(students):
     active_students.sort(key=due_date_sort_key)
     past_students.sort(key=due_date_sort_key)
 
-    # UI Display
-    st.write(f"Total Confirmed Students: **{len(students)}**")
-
     # Render Active Section
     with st.expander(f"🟢 Active Students ({len(active_students)})", expanded=True):
         if not active_students:
-            st.warning("No students currently marked as 'Active' for this mentor.")
+            st.warning("No students currently marked as 'Active' in this cohort.")
         else:
             for student in active_students:
                 render_student_card_ui(student)
@@ -1207,6 +1205,58 @@ def show_confirmed_students(students):
         else:
             for student in past_students:
                 render_student_card_ui(student)
+
+def render_student_card_ui(student):
+    """Helper function to render the specific card design for the confirmed students list"""
+    pm_name = student.get("program_manager_name") or "—"
+    pm_email = student.get("program_manager_email") or "—"
+    due = format_date(student.get("revised_final_paper_due", ""))
+    preferred_name = student.get("preferred_name", "") or "—"
+
+    card_col, btn_col = st.columns([6, 1])
+    with card_col:
+        st.markdown(
+            f"""
+            <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                        margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                        border-left:4px solid #BE1E2D;">
+                <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
+                    {student["name"]}
+                </div>
+                <div style="display:flex; gap:3rem; flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Preferred Name
+                        </div>
+                        <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Program Manager
+                        </div>
+                        <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
+                        <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Revised Final Paper Due
+                        </div>
+                        <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with btn_col:
+        st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+        # Unique keys are crucial here because the function is called multiple times per page load
+        if st.button("View →", key=f"btn_confirmed_{student['id']}", use_container_width=True):
+            st.session_state.selected_student_name = student["name"]
+            st.rerun()
                 
 def show_mentor_meeting_summary(student):
     st.markdown("### Meeting Summary")
