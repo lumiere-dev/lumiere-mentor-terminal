@@ -1134,21 +1134,13 @@ def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">These are the students you\'re actively working with or have worked with in the past. Click into any student to view their background, track deadlines and submissions, and review meeting notes.</p>', unsafe_allow_html=True)
 
-    confirmed_students = students
-
-    if not confirmed_students:
+    if not students:
         st.info("No confirmed students yet. Students will appear here once they confirm the mentor match.")
         return
 
-    # Sort: upcoming due dates soonest first, overdue/empty dates at the bottom
-    confirmed_students.sort(key=due_date_sort_key)
-
-    # If a student is selected, show their profile
+    # If a student is selected, show their profile (Detail View)
     if "selected_student_name" in st.session_state and st.session_state.selected_student_name:
-        selected = next(
-            (s for s in confirmed_students if s["name"] == st.session_state.selected_student_name),
-            None
-        )
+        selected = next((s for s in students if s["name"] == st.session_state.selected_student_name), None)
         if selected:
             if st.button("← Back to Student List"):
                 st.session_state.selected_student_name = None
@@ -1173,94 +1165,102 @@ def show_confirmed_students(students):
             is_foundation_volunteer = st.session_state.get("is_foundation_volunteer", False)
             if is_foundation_volunteer:
                 tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
-                with tab1:
-                    show_student_background(selected)
-                with tab2:
-                    show_mentor_meeting_summary(selected)
-                with tab3:
-                    show_student_deadlines_and_submissions(selected)
-                with tab4:
-                    show_mentor_submissions(selected)
+                with tab1: show_student_background(selected)
+                with tab2: show_mentor_meeting_summary(selected)
+                with tab3: show_student_deadlines_and_submissions(selected)
+                with tab4: show_mentor_submissions(selected)
             else:
                 tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions", "💳 Payment Information"])
-                with tab1:
-                    show_student_background(selected)
-                with tab2:
-                    show_mentor_meeting_summary(selected)
-                with tab3:
-                    show_student_deadlines_and_submissions(selected)
-                with tab4:
-                    show_mentor_submissions(selected)
-                with tab5:
-                    show_payment_information(selected)
+                with tab1: show_student_background(selected)
+                with tab2: show_mentor_meeting_summary(selected)
+                with tab3: show_student_deadlines_and_submissions(selected)
+                with tab4: show_mentor_submissions(selected)
+                with tab5: show_payment_information(selected)
             return
 
-    # Filter by student name
-    student_names = ["All Students"] + [s["name"] for s in confirmed_students]
-    selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
-    if selected_filter != "All Students":
-        confirmed_students = [s for s in confirmed_students if s["name"] == selected_filter]
+    # --- LIST VIEW WITH GROUPING ---
+    
+    # Partition students based on status
+    active_students = [s for s in students if s.get("student_status") != "Completed"]
+    past_students = [s for s in students if s.get("student_status") == "Completed"]
 
-    st.markdown(f"**{len(confirmed_students)}** student{'s' if len(confirmed_students) != 1 else ''}")
+    # Sort both lists by due date
+    active_students.sort(key=due_date_sort_key)
+    past_students.sort(key=due_date_sort_key)
 
-    # Student list
-    for student in confirmed_students:
-        pm_name = student.get("program_manager_name") or "—"
-        pm_email = student.get("program_manager_email") or "—"
-        due = format_date(student.get("revised_final_paper_due", ""))
-        white_label = student.get("white_label", "") or "—"
-        preferred_name = student.get("preferred_name", "") or "—"
+    # 1. Active Students Section
+    st.markdown("### 🟢 Active Students")
+    if not active_students:
+        st.info("No active students found.")
+    else:
+        for student in active_students:
+            render_student_card_ui(student)
 
-        card_col, btn_col = st.columns([6, 1])
-        with card_col:
-            st.markdown(
-                f"""
-                <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
-                            margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
-                            border-left:4px solid #BE1E2D;">
-                    <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
-                        {student["name"]}
+    # 2. Past Students Section
+    if past_students:
+        st.markdown("---")
+        with st.expander(f"📂 Past Students ({len(past_students)})", expanded=False):
+            for student in past_students:
+                render_student_card_ui(student)
+
+def render_student_card_ui(student):
+    """Helper function to render the specific card design from your original code"""
+    pm_name = student.get("program_manager_name") or "—"
+    pm_email = student.get("program_manager_email") or "—"
+    due = format_date(student.get("revised_final_paper_due", ""))
+    white_label = student.get("white_label", "") or "—"
+    preferred_name = student.get("preferred_name", "") or "—"
+
+    card_col, btn_col = st.columns([6, 1])
+    with card_col:
+        st.markdown(
+            f"""
+            <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                        margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                        border-left:4px solid #BE1E2D;">
+                <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
+                    {student["name"]}
+                </div>
+                <div style="display:flex; gap:3rem; flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Preferred Name
+                        </div>
+                        <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
                     </div>
-                    <div style="display:flex; gap:3rem; flex-wrap:wrap;">
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Preferred Name
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Program Manager
                         </div>
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Program Manager
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
-                            <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
+                        <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
+                        <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Revised Final Paper Due
                         </div>
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Revised Final Paper Due
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                        <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                            Status
                         </div>
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Is this a white label student?
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{white_label}</div>
-                        </div>
+                        <div style="font-size:0.88rem; color:#334155;">{student.get('student_status', 'Active')}</div>
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
-        with btn_col:
-            st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
-            if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
-                st.session_state.selected_student_name = student["name"]
-                st.rerun()
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with btn_col:
+        st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+        if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
+            st.session_state.selected_student_name = student["name"]
+            st.rerun()
 
 def show_mentor_meeting_summary(student):
     st.markdown("### Meeting Summary")
