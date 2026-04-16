@@ -397,7 +397,7 @@ def _parse_student_record(record):
         "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
         "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
         "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], "")),
-        "active_cohort": fields.get(STUDENT_FIELDS["active_cohort"], "No")
+        "active_cohort": unwrap(fields.get(STUDENT_FIELDS["active_cohort"], "No"))
     }
 
 @st.cache_data(ttl=3600)
