@@ -1134,123 +1134,137 @@ def show_assigned_students(students):
 
 # VIEW B: CONFIRMED STUDENTS
 # VIEW B: CONFIRMED STUDENTS
-# VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Manage your active and past research projects.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">These are the students you\'re actively working with or have worked with in the past. Click into any student to view their background, track deadlines and submissions, and review meeting notes.</p>', unsafe_allow_html=True)
 
-    if not students:
-        st.info("No confirmed students found for this email address.")
+    confirmed_students = students
+
+    if not confirmed_students:
+        st.info("No confirmed students yet. Students will appear here once they confirm the mentor match.")
         return
 
-    # Detail View Logic
+    # Sort: upcoming due dates soonest first, overdue/empty dates at the bottom
+    confirmed_students.sort(key=due_date_sort_key)
+
+    # If a student is selected, show their profile
     if "selected_student_name" in st.session_state and st.session_state.selected_student_name:
-        selected = next((s for s in students if s["name"] == st.session_state.selected_student_name), None)
+        selected = next(
+            (s for s in confirmed_students if s["name"] == st.session_state.selected_student_name),
+            None
+        )
         if selected:
             if st.button("← Back to Student List"):
                 st.session_state.selected_student_name = None
                 st.rerun()
+
             st.markdown(f"## {selected['name']}")
-            # ... (Rest of your detail view logic)
+
+            if selected.get("white_label"):
+                partner = selected["white_label"]
+                st.markdown(
+                    f'<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:1rem 1.25rem;margin:0.75rem 0 1rem 0;">'
+                    f'<div style="font-size:0.85rem;font-weight:700;color:#1E40AF;margin-bottom:0.3rem;">🤝 White Label Student — {partner}</div>'
+                    f'<div style="font-size:0.85rem;color:#1E3A8A;line-height:1.6;">'
+                    f'This student is enrolled through a partner program. While Lumiere runs the research program on the backend, the student receives all program resources, communications, and branding through <strong>{partner}</strong> — not directly from Lumiere. '
+                    f'<strong>Please refrain from mentioning Lumiere in your communication with this student.</strong>'
+                    f'</div></div>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown("---")
+
+            is_foundation_volunteer = st.session_state.get("is_foundation_volunteer", False)
+            if is_foundation_volunteer:
+                tab1, tab2, tab3, tab4 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions"])
+                with tab1:
+                    show_student_background(selected)
+                with tab2:
+                    show_mentor_meeting_summary(selected)
+                with tab3:
+                    show_student_deadlines_and_submissions(selected)
+                with tab4:
+                    show_mentor_submissions(selected)
+            else:
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎓 Student Background", "📋 Meeting Summary", "📅 Student Deadlines & Submissions", "📝 Your Submissions", "💳 Payment Information"])
+                with tab1:
+                    show_student_background(selected)
+                with tab2:
+                    show_mentor_meeting_summary(selected)
+                with tab3:
+                    show_student_deadlines_and_submissions(selected)
+                with tab4:
+                    show_mentor_submissions(selected)
+                with tab5:
+                    show_payment_information(selected)
             return
 
-    # --- DEBUGGING SECTION ---
-    # This helps us see why the filter is failing
-    with st.expander("🛠️ Debug Information (Raw Data Check)", expanded=False):
-        st.write("First student raw 'active_cohort' value:", students[0].get("active_cohort"))
-        st.write("Total students fetched:", len(students))
-        
-        # Display a small table of statuses
-        debug_df = pd.DataFrame([{
-            "Name": s['name'], 
-            "Raw Active Cohort Val": s.get('active_cohort'),
-            "Type": str(type(s.get('active_cohort')))
-        } for s in students])
-        st.table(debug_df)
+    # Filter by student name
+    student_names = ["All Students"] + [s["name"] for s in confirmed_students]
+    selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
+    if selected_filter != "All Students":
+        confirmed_students = [s for s in confirmed_students if s["name"] == selected_filter]
 
-    # --- GROUPING LOGIC ---
-    active_students = []
-    past_students = []
+    st.markdown(f"**{len(confirmed_students)}** student{'s' if len(confirmed_students) != 1 else ''}")
 
-    for s in students:
-        # We use a very broad check: convert to string and look for "Yes"
-        # This bypasses issues with lists vs strings vs booleans
-        val = str(s.get("active_cohort", "No"))
-        if "Yes" in val:
-            active_students.append(s)
-        else:
-            past_students.append(s)
+    # Student list
+    for student in confirmed_students:
+        pm_name = student.get("program_manager_name") or "—"
+        pm_email = student.get("program_manager_email") or "—"
+        due = format_date(student.get("revised_final_paper_due", ""))
+        white_label = student.get("white_label", "") or "—"
+        preferred_name = student.get("preferred_name", "") or "—"
 
-    active_students.sort(key=due_date_sort_key)
-    past_students.sort(key=due_date_sort_key)
-
-    # 1. Active Section
-    with st.expander(f"🟢 Active Students ({len(active_students)})", expanded=True):
-        if not active_students:
-            st.warning("Filter check: No students were matched as 'Active'. Check the Debug Table above.")
-        else:
-            for student in active_students:
-                render_student_card_ui(student)
-
-    # 2. Past Section
-    with st.expander(f"📂 Past Students ({len(past_students)})", expanded=False):
-        if not past_students:
-            st.caption("No past records found.")
-        else:
-            for student in past_students:
-                render_student_card_ui(student)
-
-def render_student_card_ui(student):
-    """Helper function to render the specific card design for the confirmed students list"""
-    pm_name = student.get("program_manager_name") or "—"
-    pm_email = student.get("program_manager_email") or "—"
-    due = format_date(student.get("revised_final_paper_due", ""))
-    preferred_name = student.get("preferred_name", "") or "—"
-
-    card_col, btn_col = st.columns([6, 1])
-    with card_col:
-        st.markdown(
-            f"""
-            <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
-                        margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
-                        border-left:4px solid #BE1E2D;">
-                <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
-                    {student["name"]}
-                </div>
-                <div style="display:flex; gap:3rem; flex-wrap:wrap;">
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                            Preferred Name
-                        </div>
-                        <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
+        card_col, btn_col = st.columns([6, 1])
+        with card_col:
+            st.markdown(
+                f"""
+                <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                            margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                            border-left:4px solid #BE1E2D;">
+                    <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
+                        {student["name"]}
                     </div>
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                            Program Manager
+                    <div style="display:flex; gap:3rem; flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Preferred Name
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
                         </div>
-                        <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
-                        <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
-                    </div>
-                    <div>
-                        <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                            Revised Final Paper Due
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Program Manager
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
+                            <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
                         </div>
-                        <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Revised Final Paper Due
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                Is this a white label student?
+                            </div>
+                            <div style="font-size:0.88rem; color:#334155;">{white_label}</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    with btn_col:
-        st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
-        # Unique keys are crucial here because the function is called multiple times per page load
-        if st.button("View →", key=f"btn_confirmed_{student['id']}", use_container_width=True):
-            st.session_state.selected_student_name = student["name"]
-            st.rerun()
+                """,
+                unsafe_allow_html=True
+            )
+        with btn_col:
+            st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+            if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
+                st.session_state.selected_student_name = student["name"]
+                st.rerun()
                 
 def show_mentor_meeting_summary(student):
     st.markdown("### Meeting Summary")
