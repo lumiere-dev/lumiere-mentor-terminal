@@ -1,11 +1,11 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from pyairtable import Api
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 import resend
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from streamlit_cookies_controller import CookieController
-import streamlit_analytics2 as streamlit_analytics
 
 # Page config
 st.set_page_config(
@@ -13,6 +13,36 @@ st.set_page_config(
     page_icon="🔥",
     layout="wide",
     initial_sidebar_state="expanded"
+)
+
+# ── Umami analytics (injected into parent frame so it tracks the real URL) ──
+components.html(
+    """
+    <script>
+    (function() {
+        if (window.parent && !window.parent.__umami_loaded) {
+            window.parent.__umami_loaded = true;
+
+            const s = window.parent.document.createElement('script');
+            s.defer = true;
+            s.src = 'https://cloud.umami.is/script.js';
+            s.setAttribute('data-website-id', 'ee453438-393d-4965-a1f9-cd2a68e6b013');
+            s.setAttribute('data-auto-track', 'false');   // ← stop auto-pageviews
+
+            // Fire exactly ONE pageview once the script finishes loading
+            s.onload = function() {
+                if (window.parent.umami) {
+                    window.parent.umami.track();
+                }
+            };
+
+            window.parent.document.head.appendChild(s);
+        }
+    })();
+    </script>
+    """,
+    height=0,
+    width=0,
 )
 
 # Cookie controller for persistent 30-day sessions
@@ -107,6 +137,29 @@ def send_magic_link(email, mentor_name):
     except Exception as e:
         st.error(f"Failed to send email: {e}")
         return False
+
+def track_umami_login(email):
+    """Identify the user in Umami and fire a 'login' event in the parent frame."""
+    safe_email = (email or "").replace("'", "\\'")
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            const fire = () => {{
+                if (window.parent && window.parent.umami) {{
+                    window.parent.umami.identify({{ email: '{safe_email}' }});
+                    window.parent.umami.track('login', {{ email: '{safe_email}' }});
+                }} else {{
+                    setTimeout(fire, 200);   // wait for umami to finish loading
+                }}
+            }};
+            fire();
+        }})();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
 # Field mappings (adjust these to match your exact Airtable field names)
 STUDENT_FIELDS = {
@@ -318,6 +371,8 @@ if "selected_student_name" not in st.session_state:
     st.session_state.selected_student_name = None
 if "selected_prospective_student" not in st.session_state:
     st.session_state.selected_prospective_student = None
+if "login_tracked" not in st.session_state:
+    st.session_state.login_tracked = False
 
 # Helper functions
 @st.cache_data(ttl=3600)  # Cache for 5 minutes
@@ -909,6 +964,7 @@ def show_dashboard():
             st.session_state.mentor_name = None
             st.session_state.mentor_email = None
             st.session_state.is_preview = False
+            st.session_state.login_tracked = False
             # Clear session cookie if present (won't exist in preview mode)
             try:
                 if cookie_manager.get(SESSION_COOKIE):
@@ -1132,7 +1188,6 @@ def show_assigned_students(students):
                 st.session_state.selected_prospective_student = student["name"]
                 st.rerun()
 
-# VIEW B: CONFIRMED STUDENTS
 # VIEW B: CONFIRMED STUDENTS
 def show_confirmed_students(students):
     st.markdown('<p class="main-header">Confirmed Students</p>', unsafe_allow_html=True)
@@ -1696,6 +1751,7 @@ def main():
             del st.session_state.pending_session_cookie
         except Exception:
             pass  # Component not ready yet — retry on next run
+    
     # Restore session from cookie (survives tab close/refresh for 30 days)
     check_session_cookie()
     # Then check for a fresh magic link token in the URL
@@ -1704,8 +1760,11 @@ def main():
     if not st.session_state.authenticated:
         show_login_page()
     else:
+        # ── Fire login event once per session ──
+        if not st.session_state.get("login_tracked"):
+            track_umami_login(st.session_state.mentor_email)
+            st.session_state.login_tracked = True
         show_dashboard()
 
 if __name__ == "__main__":
-    with streamlit_analytics.track():
-        main()
+    main()
