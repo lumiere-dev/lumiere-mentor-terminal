@@ -26,7 +26,7 @@ components.html(
             const s = window.parent.document.createElement('script');
             s.defer = true;
             s.src = 'https://cloud.umami.is/script.js';
-            s.setAttribute('data-website-id', 'ee453438-393d-4965-a1f9-cd2a68e6b013');
+            s.setAttribute('data-website-id', 'b2bd828b-877d-4d4b-88cf-a2bfe4dec7fd');
             s.setAttribute('data-auto-track', 'false');   // ← stop auto-pageviews
 
             // Fire exactly ONE pageview once the script finishes loading
