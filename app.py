@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from pyairtable import Api
 import pandas as pd
 from datetime import datetime, timedelta, timezone
@@ -12,6 +13,36 @@ st.set_page_config(
     page_icon="🔥",
     layout="wide",
     initial_sidebar_state="expanded"
+)
+
+# ── Umami analytics (injected into parent frame so it tracks the real URL) ──
+components.html(
+    """
+    <script>
+    (function() {
+        if (window.parent && !window.parent.__umami_loaded) {
+            window.parent.__umami_loaded = true;
+
+            const s = window.parent.document.createElement('script');
+            s.defer = true;
+            s.src = 'https://cloud.umami.is/script.js';
+            s.setAttribute('data-website-id', 'b2bd828b-877d-4d4b-88cf-a2bfe4dec7fd');
+            s.setAttribute('data-auto-track', 'false');   // ← stop auto-pageviews
+
+            // Fire exactly ONE pageview once the script finishes loading
+            s.onload = function() {
+                if (window.parent.umami) {
+                    window.parent.umami.track();
+                }
+            };
+
+            window.parent.document.head.appendChild(s);
+        }
+    })();
+    </script>
+    """,
+    height=0,
+    width=0,
 )
 
 # Cookie controller for persistent 30-day sessions
@@ -107,6 +138,29 @@ def send_magic_link(email, mentor_name):
         st.error(f"Failed to send email: {e}")
         return False
 
+def track_umami_login(email):
+    """Identify the user in Umami and fire a 'login' event in the parent frame."""
+    safe_email = (email or "").replace("'", "\\'")
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            const fire = () => {{
+                if (window.parent && window.parent.umami) {{
+                    window.parent.umami.identify({{ email: '{safe_email}' }});
+                    window.parent.umami.track('login', {{ email: '{safe_email}' }});
+                }} else {{
+                    setTimeout(fire, 200);   // wait for umami to finish loading
+                }}
+            }};
+            fire();
+        }})();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
+
 # Field mappings (adjust these to match your exact Airtable field names)
 STUDENT_FIELDS = {
     "name": "Student Cohort Application Tracker",
@@ -147,7 +201,9 @@ STUDENT_FIELDS = {
     "mentor_payment_status": "FN: Mentor Payment Status (Total)",
     "payment_date_1": "FN: 1st Payment date to Mentor",
     "payment_date_2": "FN: 2nd Payment date to Mentor",
-    "payment_date_3": "FN: 3rd Pay Date"
+    "payment_date_3": "FN: 3rd Pay Date",
+    "active_cohort": "Active Cohort (from Cohort of Program)"
+    
 }
 
 DEADLINE_FIELDS = {
@@ -315,6 +371,8 @@ if "selected_student_name" not in st.session_state:
     st.session_state.selected_student_name = None
 if "selected_prospective_student" not in st.session_state:
     st.session_state.selected_prospective_student = None
+if "login_tracked" not in st.session_state:
+    st.session_state.login_tracked = False
 
 # Helper functions
 @st.cache_data(ttl=3600)  # Cache for 5 minutes
@@ -393,7 +451,8 @@ def _parse_student_record(record):
         "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
         "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
         "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
-        "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], ""))
+        "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], "")),
+        "active_cohort": unwrap(fields.get(STUDENT_FIELDS["active_cohort"], "No"))
     }
 
 @st.cache_data(ttl=3600)
@@ -484,7 +543,7 @@ def get_meeting_notes_for_student(student_name):
         for record in records:
             fields = record["fields"]
             notes.append({
-                "date": fields.get("Date of meeting", ""),
+                "date": fields.get("Date of Meeting", ""),
                 "notes": fields.get("Meeting Notes Between Mentor & Student", ""),
             })
 
@@ -905,6 +964,7 @@ def show_dashboard():
             st.session_state.mentor_name = None
             st.session_state.mentor_email = None
             st.session_state.is_preview = False
+            st.session_state.login_tracked = False
             # Clear session cookie if present (won't exist in preview mode)
             try:
                 if cookie_manager.get(SESSION_COOKIE):
@@ -1260,7 +1320,7 @@ def show_confirmed_students(students):
             if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
                 st.session_state.selected_student_name = student["name"]
                 st.rerun()
-
+                
 def show_mentor_meeting_summary(student):
     st.markdown("### Meeting Summary")
 
@@ -1691,6 +1751,7 @@ def main():
             del st.session_state.pending_session_cookie
         except Exception:
             pass  # Component not ready yet — retry on next run
+    
     # Restore session from cookie (survives tab close/refresh for 30 days)
     check_session_cookie()
     # Then check for a fresh magic link token in the URL
@@ -1699,6 +1760,10 @@ def main():
     if not st.session_state.authenticated:
         show_login_page()
     else:
+        # ── Fire login event once per session ──
+        if not st.session_state.get("login_tracked"):
+            track_umami_login(st.session_state.mentor_email)
+            st.session_state.login_tracked = True
         show_dashboard()
 
 if __name__ == "__main__":
