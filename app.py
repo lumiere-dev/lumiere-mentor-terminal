@@ -485,7 +485,7 @@ def get_meeting_notes_for_student(student_name):
             fields = record["fields"]
             notes.append({
                 "date": fields.get("Date of meeting", ""),
-                "notes": fields.get("Meeting Notes Between Mentor & Student", "")
+                "notes": fields.get("Meeting Notes Between Mentor & Student", ""),
             })
 
         notes.sort(key=lambda x: x["date"] or "0000-00-00", reverse=True)
@@ -1007,7 +1007,7 @@ def show_resources():
 # VIEW A: ASSIGNED STUDENTS
 def show_assigned_students(students):
     st.markdown('<p class="main-header">Prospective Students</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">These are your prospective students for the upcoming cohort, and where they are in the onboarding pipeline. As a reminder, once you\'ve confirmed that you\'d like to work with a student, the student needs to confirm — then we kick off!</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">These are your prospective students for the upcoming cohort, and where they are in the onboarding pipeline. As a reminder, once you\'ve confirmed that you\'d like to work with a student, the student needs to confirm as well. If we\'ve received a student\'s confirmation, then around the cohort start date, we introduce you both via email! At this point, the student will move to the Confirmed Students page!</p>', unsafe_allow_html=True)
 
     if not students:
         st.info("You have no prospective students for the upcoming cohort yet!")
