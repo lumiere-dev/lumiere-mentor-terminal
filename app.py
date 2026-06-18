@@ -531,11 +531,12 @@ def get_deadlines_for_student(student_name):
         return []
 
 @st.cache_data(ttl=3600)
-def get_meeting_notes_for_student(student_id):
+def get_meeting_notes_for_student(student_name):
     """Get meeting notes from the progress/evaluations table for a student"""
     tables = get_tables()
     try:
-        formula = f"AND(FIND('{student_id}', ARRAYJOIN({{Student_Cohort_Name_Application Table}})), {{Type of Record}} = 'Mentor Update')"
+        name_part = student_name.split('|')[0].strip()
+        formula = f"AND({{Student_Cohort_Name_Application Table}} = '{name_part}', {{Type of Record}} = 'Mentor Update')"
         records = tables["progress"].all(formula=formula)
 
         notes = []
@@ -1367,7 +1368,7 @@ def show_mentor_meeting_summary(student):
     st.markdown("---")
     st.markdown("### Your Meeting Notes with the Student")
 
-    meeting_notes = get_meeting_notes_for_student(student["id"])
+    meeting_notes = get_meeting_notes_for_student(student["name"])
 
     if not meeting_notes:
         st.info("No meeting notes found for this student.")
