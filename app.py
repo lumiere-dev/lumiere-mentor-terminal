@@ -494,12 +494,11 @@ def get_prospective_students(mentor_email):
         return []
 
 @st.cache_data(ttl=3600)
-def get_deadlines_for_student(student_name):
+def get_deadlines_for_student(student_id):
     """Get all deadlines for a specific student"""
     tables = get_tables()
     try:
-        # Search for student name in Deadline Name field
-        formula = f"FIND('{student_name.split('|')[0].strip()}', {{Deadline Name}})"
+        formula = f"{{record id (from Student Application & Cohort Tracker)}} = '{student_id}'"
         records = tables["deadlines"].all(formula=formula)
 
         deadlines = []
@@ -1581,7 +1580,7 @@ def show_payment_information(student):
 def show_student_deadlines_and_submissions(student):
     st.markdown("### Student Deadlines & Submissions")
 
-    all_deadlines = get_deadlines_for_student(student["name"])
+    all_deadlines = get_deadlines_for_student(student["id"])
     # Filter out Syllabus — those are shown in Mentor Submissions
     deadlines = [d for d in all_deadlines if d["type"] != "Syllabus"]
 
@@ -1672,7 +1671,7 @@ def show_student_deadlines_and_submissions(student):
 def show_mentor_submissions(student):
     st.markdown("### Mentor Submissions")
 
-    all_deadlines = get_deadlines_for_student(student["name"])
+    all_deadlines = get_deadlines_for_student(student["id"])
     syllabus_deadlines = [d for d in all_deadlines if d["type"] == "Syllabus"]
     eval_deadlines = [d for d in all_deadlines if d["type"] == "Evaluation & Feedback"]
 
