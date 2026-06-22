@@ -1253,16 +1253,22 @@ def show_confirmed_students(students):
                     show_payment_information(selected)
             return
 
-    # Filter by student name
-    student_names = ["All Students"] + [s["name"] for s in confirmed_students]
-    selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
+    # Filters
+    col_name, col_status = st.columns([3, 1])
+    with col_name:
+        student_names = ["All Students"] + [s["name"] for s in confirmed_students]
+        selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
+    with col_status:
+        status_filter = st.selectbox("Program status", ["All", "In Progress", "Completed"], key="confirmed_status")
+
     if selected_filter != "All Students":
         confirmed_students = [s for s in confirmed_students if s["name"] == selected_filter]
+    if status_filter == "In Progress":
+        confirmed_students = [s for s in confirmed_students if s.get("final_submission_status") != "Submitted"]
+    elif status_filter == "Completed":
+        confirmed_students = [s for s in confirmed_students if s.get("final_submission_status") == "Submitted"]
 
     st.markdown(f"**{len(confirmed_students)}** student{'s' if len(confirmed_students) != 1 else ''}")
-
-    in_progress = [s for s in confirmed_students if s.get("final_submission_status") != "Submitted"]
-    completed = [s for s in confirmed_students if s.get("final_submission_status") == "Submitted"]
 
     def render_student_cards(student_list):
         for student in student_list:
@@ -1323,13 +1329,7 @@ def show_confirmed_students(students):
                     st.session_state.selected_student_name = student["name"]
                     st.rerun()
 
-    if in_progress:
-        st.markdown("#### Program In Progress")
-        render_student_cards(in_progress)
-
-    if completed:
-        st.markdown("#### Program Completed")
-        render_student_cards(completed)
+    render_student_cards(confirmed_students)
                 
 def show_mentor_meeting_summary(student):
     st.markdown("### Meeting Summary")
