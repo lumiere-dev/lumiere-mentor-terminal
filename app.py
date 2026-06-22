@@ -203,7 +203,7 @@ STUDENT_FIELDS = {
     "payment_date_2": "FN: 2nd Payment date to Mentor",
     "payment_date_3": "FN: 3rd Pay Date",
     "active_cohort": "Active Cohort (from Cohort of Program)",
-    "final_submission_status": "Final Submission Status"
+    "final_submission_status": "Final Submission Status "
 }
 
 DEADLINE_FIELDS = {
