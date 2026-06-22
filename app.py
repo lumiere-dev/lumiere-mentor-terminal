@@ -1259,7 +1259,7 @@ def show_confirmed_students(students):
         student_names = ["All Students"] + [s["name"] for s in confirmed_students]
         selected_filter = st.selectbox("🔍 Search by student name", student_names, key="confirmed_search")
     with col_status:
-        status_filter = st.selectbox("Program status", ["All", "In Progress", "Completed"], key="confirmed_status")
+        status_filter = st.selectbox("Program status", ["All", "In Progress", "Completed"], key="confirmed_status", help="In Progress: student hasn't made their final submission yet. Completed: student has made their final submission.")
 
     if selected_filter != "All Students":
         confirmed_students = [s for s in confirmed_students if s["name"] == selected_filter]
