@@ -202,8 +202,8 @@ STUDENT_FIELDS = {
     "payment_date_1": "FN: 1st Payment date to Mentor",
     "payment_date_2": "FN: 2nd Payment date to Mentor",
     "payment_date_3": "FN: 3rd Pay Date",
-    "active_cohort": "Active Cohort (from Cohort of Program)"
-    
+    "active_cohort": "Active Cohort (from Cohort of Program)",
+    "final_submission_status": "Final Submission Status"
 }
 
 DEADLINE_FIELDS = {
@@ -452,7 +452,8 @@ def _parse_student_record(record):
         "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
         "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
         "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], "")),
-        "active_cohort": unwrap(fields.get(STUDENT_FIELDS["active_cohort"], "No"))
+        "active_cohort": unwrap(fields.get(STUDENT_FIELDS["active_cohort"], "No")),
+        "final_submission_status": fields.get(STUDENT_FIELDS["final_submission_status"], "Not Submitted")
     }
 
 @st.cache_data(ttl=3600)
@@ -1260,64 +1261,75 @@ def show_confirmed_students(students):
 
     st.markdown(f"**{len(confirmed_students)}** student{'s' if len(confirmed_students) != 1 else ''}")
 
-    # Student list
-    for student in confirmed_students:
-        pm_name = student.get("program_manager_name") or "—"
-        pm_email = student.get("program_manager_email") or "—"
-        due = format_date(student.get("revised_final_paper_due", ""))
-        white_label = student.get("white_label", "") or "—"
-        preferred_name = student.get("preferred_name", "") or "—"
+    in_progress = [s for s in confirmed_students if s.get("final_submission_status") != "Submitted"]
+    completed = [s for s in confirmed_students if s.get("final_submission_status") == "Submitted"]
 
-        card_col, btn_col = st.columns([6, 1])
-        with card_col:
-            st.markdown(
-                f"""
-                <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
-                            margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
-                            border-left:4px solid #BE1E2D;">
-                    <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
-                        {student["name"]}
+    def render_student_cards(student_list):
+        for student in student_list:
+            pm_name = student.get("program_manager_name") or "—"
+            pm_email = student.get("program_manager_email") or "—"
+            due = format_date(student.get("revised_final_paper_due", ""))
+            white_label = student.get("white_label", "") or "—"
+            preferred_name = student.get("preferred_name", "") or "—"
+
+            card_col, btn_col = st.columns([6, 1])
+            with card_col:
+                st.markdown(
+                    f"""
+                    <div style="background:#FFFFFF; border-radius:12px; padding:1.25rem 1.5rem;
+                                margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+                                border-left:4px solid #BE1E2D;">
+                        <div style="font-size:1rem; font-weight:700; color:#1A1A2E; margin-bottom:0.6rem;">
+                            {student["name"]}
+                        </div>
+                        <div style="display:flex; gap:3rem; flex-wrap:wrap;">
+                            <div>
+                                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                    Preferred Name
+                                </div>
+                                <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                    Program Manager
+                                </div>
+                                <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
+                                <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                    Revised Final Paper Due
+                                </div>
+                                <div style="font-size:0.88rem; color:#334155;">{due}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
+                                            text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
+                                    Is this a white label student?
+                                </div>
+                                <div style="font-size:0.88rem; color:#334155;">{white_label}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:3rem; flex-wrap:wrap;">
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Preferred Name
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{preferred_name}</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Program Manager
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{pm_name}</div>
-                            <div style="font-size:0.82rem; color:#64748B;">{pm_email}</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Revised Final Paper Due
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{due}</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.72rem; font-weight:600; color:#94A3B8;
-                                        text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem;">
-                                Is this a white label student?
-                            </div>
-                            <div style="font-size:0.88rem; color:#334155;">{white_label}</div>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-        with btn_col:
-            st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
-            if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
-                st.session_state.selected_student_name = student["name"]
-                st.rerun()
+                    """,
+                    unsafe_allow_html=True
+                )
+            with btn_col:
+                st.markdown("<div style='margin-top:1rem;'></div>", unsafe_allow_html=True)
+                if st.button("View →", key=f"student_{student['id']}", use_container_width=True):
+                    st.session_state.selected_student_name = student["name"]
+                    st.rerun()
+
+    if in_progress:
+        st.markdown("#### Program In Progress")
+        render_student_cards(in_progress)
+
+    if completed:
+        st.markdown("#### Program Completed")
+        render_student_cards(completed)
                 
 def show_mentor_meeting_summary(student):
     st.markdown("### Meeting Summary")
