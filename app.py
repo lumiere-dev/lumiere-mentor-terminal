@@ -483,7 +483,7 @@ def get_prospective_students(mentor_email):
         formula = (
             f'AND('
             f'{{Student Confirmed & Launched}} != "Yes", '
-            f'{{Written Confirmation/Participation Decision}} != "No", '
+            f'{{Written Confirmation/Participation Decision [OB]}} != "No", '
             f'FIND("True", ARRAYJOIN({{Upcoming Cohort (Cohort Table)}})), '
             f'FIND("{email_lower}", LOWER(ARRAYJOIN({{Mentor Email}}, ",")))'
             f')'
