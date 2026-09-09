@@ -375,12 +375,28 @@ if "login_tracked" not in st.session_state:
     st.session_state.login_tracked = False
 
 # Helper functions
+def _email_matches_field(field_value, email):
+    """True if `email` exactly matches one of the comma-separated addresses
+    in field_value. Some mentors have more than one email on file; a plain
+    substring check would risk false positives like 'jaym09@x.com' matching
+    inside 'geejaym09@x.com', so each candidate is compared as a whole
+    address, not a substring."""
+    if not field_value:
+        return False
+    email = email.strip().lower()
+    return any(part.strip().lower() == email for part in str(field_value).split(","))
+
 @st.cache_data(ttl=3600)  # Cache for 5 minutes
 def get_mentor_by_email(email):
     """Find mentor by email in Mentor Table"""
     tables = get_tables()
     try:
-        records = tables["mentors"].all(formula=f"LOWER({{Email}}) = LOWER('{email}')")
+        safe_email = email.strip().lower().replace("'", "\\'")
+        # FIND() is a cheap server-side pre-filter for records that could
+        # contain this address among a comma-separated list; the exact
+        # match is then verified in Python via _email_matches_field.
+        records = tables["mentors"].all(formula=f"FIND('{safe_email}', LOWER({{Email}})) > 0")
+        records = [r for r in records if _email_matches_field(r["fields"].get("Email"), email)]
         if records:
             record = records[0]
             contractor_status = record["fields"].get("Contractor/Volunteer Status", [])
