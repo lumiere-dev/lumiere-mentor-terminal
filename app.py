@@ -196,7 +196,7 @@ STUDENT_FIELDS = {
     "publication_marker": "publication marker",
     "publication_status": "PS: Latest Publication Outcome - Latest",
     "mentor_hourly_rate": "FN: Mentor Hourly Base Rate",
-    "evaluation_form_link": "Evaluation form link",
+    "evaluation_form_link": "MFFF - Mentor's Evaluation form (from Mentor-Student Progress Table (REVISED LINKAGE))",
     "revised_paper_upload": "Revised Final Paper upload (from Mentor-Student Progress Up Date)",
     "mentor_payment_status": "FN: Mentor Payment Status (Total)",
     "payment_date_1": "FN: 1st Payment date to Mentor",
@@ -462,7 +462,7 @@ def _parse_student_record(record):
         "publication_marker": unwrap(fields.get(STUDENT_FIELDS["publication_marker"], "")),
         "publication_status": unwrap(fields.get(STUDENT_FIELDS["publication_status"], "")),
         "mentor_hourly_rate": fields.get(STUDENT_FIELDS["mentor_hourly_rate"], None),
-        "evaluation_form_link": unwrap(fields.get(STUDENT_FIELDS["evaluation_form_link"], "")),
+        "evaluation_form_link": fields.get(STUDENT_FIELDS["evaluation_form_link"], []),
         "revised_paper_upload": fields.get(STUDENT_FIELDS["revised_paper_upload"], []),
         "mentor_payment_status": unwrap(fields.get(STUDENT_FIELDS["mentor_payment_status"], "")),
         "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
@@ -1575,9 +1575,9 @@ def show_payment_information(student):
     except (TypeError, ValueError):
         rate_display = str(rate_raw) if rate_raw else "Not specified"
 
-    # Evaluation & Feedback Submitted? — Yes if link field is non-empty
-    eval_link = student.get("evaluation_form_link") or ""
-    eval_submitted = bool(eval_link.strip()) if isinstance(eval_link, str) else bool(eval_link)
+    # Evaluation & Feedback Submitted? — Yes if attachment field has content
+    eval_raw = student.get("evaluation_form_link")
+    eval_submitted = bool(eval_raw) if not isinstance(eval_raw, list) else len(eval_raw) > 0
 
     # Revised Final Paper Submitted? — Yes if attachment field has content
     upload_raw = student.get("revised_paper_upload")
