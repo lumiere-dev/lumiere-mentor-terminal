@@ -196,6 +196,7 @@ STUDENT_FIELDS = {
     "publication_marker": "publication marker",
     "publication_status": "PS: Latest Publication Outcome - Latest",
     "mentor_hourly_rate": "FN: Mentor Hourly Base Rate",
+    "mentor_compensation_applicable": "Mentor Compensation Applicable",
     "evaluation_form_link": "MFFF - Mentor's Evaluation form (from Mentor-Student Progress Table (REVISED LINKAGE))",
     "revised_paper_upload": "Revised Final Paper upload (from Mentor-Student Progress Up Date)",
     "mentor_payment_status": "FN: Mentor Payment Status (Total)",
@@ -468,6 +469,7 @@ def _parse_student_record(record):
         "payment_date_1": unwrap(fields.get(STUDENT_FIELDS["payment_date_1"], "")),
         "payment_date_2": unwrap(fields.get(STUDENT_FIELDS["payment_date_2"], "")),
         "payment_date_3": unwrap(fields.get(STUDENT_FIELDS["payment_date_3"], "")),
+        "mentor_compensation_applicable": unwrap(fields.get(STUDENT_FIELDS["mentor_compensation_applicable"], "")),
         "active_cohort": unwrap(fields.get(STUDENT_FIELDS["active_cohort"], "No")),
         "final_submission_status": fields.get(STUDENT_FIELDS["final_submission_status"], "Not Submitted")
     }
@@ -1592,6 +1594,7 @@ def show_payment_information(student):
     st.markdown(
         '<div style="background:#FFFFFF;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:1.25rem;">'
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">'
+        + fb("Mentor Compensation Applicable", student.get("mentor_compensation_applicable"))
         + fb("Hourly Base Rate", rate_display)
         + yes_no_badge("Have you submitted the evaluation & feedback for this student?", eval_submitted)
         + yes_no_badge("Has the student submitted the revised final paper?", paper_submitted)
